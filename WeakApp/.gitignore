@@ -1,0 +1,10 @@
+*
+
+!/publish/
+!/publish/**
+
+!/Dockerfile
+
+!/README.md
+
+!.gitignore
