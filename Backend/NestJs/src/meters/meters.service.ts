@@ -36,6 +36,7 @@ export class MetersService implements OnModuleInit {
 
   private pollIntervalMs!: number;
   private retryMaxDelayMs!: number;
+  private isRequestInProgress = false;
 
   constructor(
     private readonly cfg: ConfigService,
@@ -74,7 +75,14 @@ export class MetersService implements OnModuleInit {
   }
 
   private async pollOnce(): Promise<number> {
-    const data = await this.http.get('meters').json<ApiResponse>();
+    if (this.isRequestInProgress) {
+      this.log.debug('Request already in progress, skipping this poll cycle');
+      return this.pollIntervalMs;
+    }
+
+    this.isRequestInProgress = true;
+    try {
+      const data = await this.http.get('meters').json<ApiResponse>();
 
     if (this.isErrorBody(data)) {
       const err = new Error(`API error body: ${data.error}`);
@@ -88,11 +96,14 @@ export class MetersService implements OnModuleInit {
       throw err;
     }
 
-    if (data.length > 0) {
-      await this.publishReadings(data);
-    }
+      if (data.length > 0) {
+        await this.publishReadings(data);
+      }
 
-    return this.pollIntervalMs;
+      return this.pollIntervalMs;
+    } finally {
+      this.isRequestInProgress = false;
+    }
   }
 
   private async publishReadings(readings: Reading[]) {
@@ -104,6 +115,14 @@ export class MetersService implements OnModuleInit {
   }
 
   private computeRetryDelay(err: unknown, attempt: number): number {
+    if (err && typeof err === 'object' && '__retryAfterDelay' in err) {
+      const customDelay = (err as any).__retryAfterDelay;
+      if (typeof customDelay === 'number' && customDelay > 0) {
+        this.log.debug(`Using Retry-After delay: ${customDelay} ms`);
+        return Math.min(customDelay, this.retryMaxDelayMs);
+      }
+    }
+
     const base = this.pollIntervalMs;
     const cap = this.retryMaxDelayMs;
     const exp = Math.min(cap, base * 2 ** (attempt - 1));

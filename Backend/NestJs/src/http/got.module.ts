@@ -38,9 +38,32 @@ export const GOT = Symbol('GOT');
             ],
             maxRetryAfter: retryCap,
           },
-          /* hooks: {
-            beforeRetry: [(opts, err, attemptCount) => {}],
-          }, */
+          hooks: {
+            beforeRetry: [
+              (error, retryCount) => {
+                const retryAfter = error.response?.headers['retry-after'];
+                if (retryAfter) {
+                  let delaySeconds = 0;
+                  if (/^\d+$/.test(retryAfter)) {
+                    delaySeconds = parseInt(retryAfter, 10);
+                  } else {
+                    const retryDate = new Date(retryAfter);
+                    if (!isNaN(retryDate.getTime())) {
+                      delaySeconds = Math.max(
+                        0,
+                        (retryDate.getTime() - Date.now()) / 1000,
+                      );
+                    }
+                  }
+
+                  const extraDelayMs = 2000;
+                  const totalDelayMs = delaySeconds * 1000 + extraDelayMs;
+
+                  (error as any).__retryAfterDelay = totalDelayMs;
+                }
+              },
+            ],
+          },
         });
 
         return client;
