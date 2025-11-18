@@ -14,9 +14,9 @@ services:
       RabbitMQ__UserName: ${RABBITMQ_DEFAULT_USER}
       RabbitMQ__Password: ${RABBITMQ_DEFAULT_PASS}
       RabbitMQ__VirtualHost: ${RABBITMQ_DEFAULT_VHOST}
+      RabbitMQ__Exchange: ${RABBITMQ_EXCHANGE}
+      RabbitMQ__ExchangeType: ${RABBITMQ_EXCHANGE_TYPE}
     depends_on:
-      weakapp:
-        condition: service_healthy
       postgres:
         condition: service_healthy
       rabbitmq:
@@ -32,14 +32,16 @@ services:
     restart: unless-stopped
     environment:
       NODE_ENV: ${NODE_ENV}
+      WEAKAPP_HOST: ${WEAKAPP_CONTAINER_NAME}
+      WEAKAPP_PORT: ${WEAKAPP_PORT}
       RABBITMQ_HOST: ${RABBITMQ_CONTAINER_NAME}
       RABBITMQ_PORT: ${RABBITMQ_PORT}
       RABBITMQ_USER: ${RABBITMQ_DEFAULT_USER}
       RABBITMQ_PASS: ${RABBITMQ_DEFAULT_PASS}
       RABBITMQ_VHOST: ${RABBITMQ_DEFAULT_VHOST}
+      RABBITMQ_EXCHANGE: ${RABBITMQ_EXCHANGE}
+      RABBITMQ_EXCHANGE_TYPE: ${RABBITMQ_EXCHANGE_TYPE}
     depends_on:
-      weakapp:
-        condition: service_healthy
       postgres:
         condition: service_healthy
       rabbitmq:
@@ -59,14 +61,8 @@ services:
 
   weakapp:
     image: ${WEAKAPP_IMAGE}
-    container_name: weakapp
+    container_name: ${WEAKAPP_CONTAINER_NAME}
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "curl -fs http://localhost/health || exit 1"]
-      interval: 10s
-      timeout: 3s
-      retries: 5
-      start_period: 10s
     networks: [appnet]
 
   postgres:
