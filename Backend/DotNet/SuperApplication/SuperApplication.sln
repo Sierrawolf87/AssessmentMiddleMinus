@@ -14,6 +14,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Data", "Data", "{4A26B1D9-C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SuperApplication.Shared.Data", "Shared\Data\SuperApplication.Shared.Data.csproj", "{6594F9EB-CC7D-4124-82F8-2A0C91976A33}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GraphQLAPI", "GraphQLAPI\GraphQLAPI.csproj", "{A44C4D48-20B4-491F-BE11-1BB454D53AA9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -72,6 +74,18 @@ Global
 		{6594F9EB-CC7D-4124-82F8-2A0C91976A33}.Release|x64.Build.0 = Release|Any CPU
 		{6594F9EB-CC7D-4124-82F8-2A0C91976A33}.Release|x86.ActiveCfg = Release|Any CPU
 		{6594F9EB-CC7D-4124-82F8-2A0C91976A33}.Release|x86.Build.0 = Release|Any CPU
+		{A44C4D48-20B4-491F-BE11-1BB454D53AA9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A44C4D48-20B4-491F-BE11-1BB454D53AA9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A44C4D48-20B4-491F-BE11-1BB454D53AA9}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{A44C4D48-20B4-491F-BE11-1BB454D53AA9}.Debug|x64.Build.0 = Debug|Any CPU
+		{A44C4D48-20B4-491F-BE11-1BB454D53AA9}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A44C4D48-20B4-491F-BE11-1BB454D53AA9}.Debug|x86.Build.0 = Debug|Any CPU
+		{A44C4D48-20B4-491F-BE11-1BB454D53AA9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A44C4D48-20B4-491F-BE11-1BB454D53AA9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A44C4D48-20B4-491F-BE11-1BB454D53AA9}.Release|x64.ActiveCfg = Release|Any CPU
+		{A44C4D48-20B4-491F-BE11-1BB454D53AA9}.Release|x64.Build.0 = Release|Any CPU
+		{A44C4D48-20B4-491F-BE11-1BB454D53AA9}.Release|x86.ActiveCfg = Release|Any CPU
+		{A44C4D48-20B4-491F-BE11-1BB454D53AA9}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
