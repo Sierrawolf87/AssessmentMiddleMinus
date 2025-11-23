@@ -23,6 +23,28 @@ services:
         condition: service_healthy
     networks: [appnet]
 
+  notificationService:
+    image: ${NOTIFICATIONSERVICE_IMAGE}
+    container_name: notificationService
+    build:
+      context: ./Backend/DotNet/SuperApplication
+      dockerfile: NotificationService/Dockerfile
+    restart: unless-stopped
+    ports:
+      - "7000:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT}
+      RabbitMQ__HostName: ${RABBITMQ_CONTAINER_NAME}
+      RabbitMQ__Port: ${RABBITMQ_PORT}
+      RabbitMQ__UserName: ${RABBITMQ_DEFAULT_USER}
+      RabbitMQ__Password: ${RABBITMQ_DEFAULT_PASS}
+      RabbitMQ__VirtualHost: ${RABBITMQ_DEFAULT_VHOST}
+      RabbitMQ__NotificationQueueName: ${RABBITMQ_NOTIFICATION_QUEUE}
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks: [appnet]
+
   nestjs:
     image: ${NESTJS_IMAGE}
     container_name: nestjsapp
