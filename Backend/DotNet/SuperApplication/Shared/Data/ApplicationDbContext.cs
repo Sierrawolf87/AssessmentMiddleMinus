@@ -1,4 +1,5 @@
 using SuperApplication.Shared.Data.Entities;
+using SuperApplication.Shared.Data.Entities.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace SuperApplication.Shared.Data;
@@ -18,8 +19,10 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<SensorReading>(entity =>
         {
             entity.HasKey(e => e.Id);
-            entity.Property(e => e.Type).HasMaxLength(50).IsRequired();
-            entity.Property(e => e.Name).HasMaxLength(50).IsRequired();
+            entity.Property(e => e.Type)
+                .IsRequired();
+            entity.Property(e => e.Name)
+                .IsRequired();
         });
     }
 }

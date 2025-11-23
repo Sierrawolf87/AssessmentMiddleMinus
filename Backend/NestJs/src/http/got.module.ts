@@ -14,7 +14,6 @@ export const GOT = Symbol('GOT');
         const host = cfg.get<string>('WEAKAPP_HOST', { infer: true });
         const port = cfg.get<number>('WEAKAPP_PORT', { infer: true });
         const timeout = cfg.get<number>('METERS_TIMEOUT_MS', { infer: true });
-        const retryCap = cfg.get<number>('RETRY_MAX_DELAY_MS', { infer: true });
 
         const client: Got = got.extend({
           prefixUrl: `http://${host}:${port}`,
