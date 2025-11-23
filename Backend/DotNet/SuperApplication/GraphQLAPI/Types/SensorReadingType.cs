@@ -1,4 +1,5 @@
 using SuperApplication.Shared.Data.Entities;
+using SuperApplication.Shared.Data.Entities.Enums;
 
 namespace GraphQLAPI.Types;
 
@@ -15,12 +16,12 @@ public class SensorReadingType
     /// <summary>
     /// Type of the sensor (e.g., AirQuality, Motion, Energy)
     /// </summary>
-    public string Type { get; set; } = string.Empty;
+    public SensorType Type { get; set; }
     
     /// <summary>
     /// Name of the sensor
     /// </summary>
-    public string Name { get; set; } = string.Empty;
+    public SensorLocation Name { get; set; }
     
     /// <summary>
     /// CO2 level in parts per million (ppm)

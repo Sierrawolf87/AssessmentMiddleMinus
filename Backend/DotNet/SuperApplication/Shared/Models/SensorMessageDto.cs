@@ -1,8 +1,10 @@
-﻿namespace SuperApplication.Shared.Models;
+﻿using SuperApplication.Shared.Data.Entities.Enums;
+
+namespace SuperApplication.Shared.Models;
 
 public class SensorMessageDto
 {
-    public string Type { get; set; } = string.Empty;
-    public string Name { get; set; } = string.Empty;
+    public SensorType Type { get; set; }
+    public SensorLocation Name { get; set; }
     public SensorPayloadDto? Payload { get; set; }
 }

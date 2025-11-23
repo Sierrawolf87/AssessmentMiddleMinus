@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace DataProcessor.Migrations
+namespace SuperApplication.Shared.Data.Migrations
 {
     /// <inheritdoc />
     public partial class Initial : Migration
@@ -16,8 +16,8 @@ namespace DataProcessor.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Type = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    Name = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    Type = table.Column<int>(type: "integer", nullable: false),
+                    Name = table.Column<int>(type: "integer", nullable: false),
                     Co2 = table.Column<int>(type: "integer", nullable: true),
                     Pm25 = table.Column<int>(type: "integer", nullable: true),
                     Humidity = table.Column<int>(type: "integer", nullable: true),

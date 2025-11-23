@@ -1,6 +1,8 @@
 using System.Text.Json;
 using SuperApplication.Shared.Data;
 using SuperApplication.Shared.Data.Entities;
+using SuperApplication.Shared.Data.Entities.Enums;
+using SuperApplication.Shared.Data.JsonConverters;
 using SuperApplication.Shared.Models;
 using DataProcessor.Infrastructure.RabbitMQ;
 using MediatR;
@@ -23,7 +25,15 @@ public class ProcessMessageCommandHandler(
         var notificationMessages = new List<SensorReading>();
         try
         {
-            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            var options = new JsonSerializerOptions 
+            { 
+                PropertyNameCaseInsensitive = true,
+                Converters = 
+                { 
+                    new EnumMemberConverter<SensorType>(),
+                    new EnumMemberConverter<SensorLocation>()
+                }
+            };
             var sensorMessages = JsonSerializer.Deserialize<List<SensorMessageDto>>(request.Content, options);
 
             if (sensorMessages != null)

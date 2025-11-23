@@ -1,5 +1,6 @@
 using SuperApplication.Shared.Data;
 using SuperApplication.Shared.Data.Entities;
+using SuperApplication.Shared.Data.Entities.Enums;
 using HotChocolate.Data;
 using Microsoft.EntityFrameworkCore;
 using GraphQLAPI.Types;
@@ -52,22 +53,22 @@ public class SensorReadingQueries
     /// <returns>Aggregated statistics</returns>
     public async Task<SensorReadingStats> GetSensorReadingStats(
         [Service] ApplicationDbContext context,
-        string? type = null,
-        string? name = null,
+        SensorType? type = null,
+        SensorLocation? name = null,
         DateTime? startDate = null,
         DateTime? endDate = null)
     {
         var query = context.SensorReadings.AsNoTracking().AsQueryable();
         
         // Apply filters
-        if (!string.IsNullOrEmpty(type))
+        if (type.HasValue)
         {
-            query = query.Where(sr => sr.Type == type);
+            query = query.Where(sr => sr.Type == type.Value);
         }
         
-        if (!string.IsNullOrEmpty(name))
+        if (name.HasValue)
         {
-            query = query.Where(sr => sr.Name == name);
+            query = query.Where(sr => sr.Name == name.Value);
         }
         
         if (startDate.HasValue)

@@ -16,7 +16,7 @@ export const envValidationSchema = Joi.object<EnvVars>({
   RABBITMQ_VHOST: Joi.string().default('/'),
   RABBITMQ_DATA_QUEUE: Joi.string().required(),
 
-  METERS_POLL_INTERVAL_MS: Joi.number().positive().default(3000),
+  METERS_POLL_INTERVAL_MS: Joi.number().positive().default(5000),
   METERS_TIMEOUT_MS: Joi.number().positive().default(3000),
   RETRY_MAX_DELAY_MS: Joi.number().positive().default(30000),
 });
