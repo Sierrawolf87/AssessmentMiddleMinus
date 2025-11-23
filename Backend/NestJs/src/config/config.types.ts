@@ -9,8 +9,7 @@ export interface EnvVars {
   RABBITMQ_USER: string;
   RABBITMQ_PASS: string;
   RABBITMQ_VHOST: string;
-  RABBITMQ_EXCHANGE: string;
-  RABBITMQ_EXCHANGE_TYPE: 'topic' | 'direct' | 'fanout' | 'headers';
+  RABBITMQ_DATA_QUEUE: string;
 
   METERS_POLL_INTERVAL_MS: number;
   METERS_TIMEOUT_MS: number;

@@ -107,11 +107,7 @@ export class MetersService implements OnModuleInit {
   }
 
   private async publishReadings(readings: Reading[]) {
-    for (const r of readings) {
-      const room = r.name.replace(/\s+/g, '_');
-      const rk = `meters.${r.type}.${room}`;
-      await this.rabbit.publish(r, rk);
-    }
+    await this.rabbit.publish(readings);
   }
 
   private computeRetryDelay(err: unknown, attempt: number): number {
