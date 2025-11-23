@@ -46,6 +46,23 @@ services:
         condition: service_healthy
     networks: [appnet]
 
+  graphqlapi:
+    image: ${GRAPHQLAPI_IMAGE}
+    container_name: graphqlapi
+    build:
+      context: ./Backend/DotNet/SuperApplication
+      dockerfile: GraphQLAPI/Dockerfile
+    restart: unless-stopped
+    ports:
+      - "8000:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT}
+      ConnectionStrings__DefaultConnection: "Host=${POSTGRES_CONTAINER_NAME};Port=${POSTGRES_PORT};Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks: [appnet]
+
   nestjs:
     image: ${NESTJS_IMAGE}
     container_name: nestjsapp
