@@ -34,6 +34,8 @@ public class RabbitMqConsumerService(
 
         try
         {
+            logger.LogInformation("Connecting to RabbitMQ at {HostName}:{Port}", _options.HostName, _options.Port);
+            
             _connection = await factory.CreateConnectionAsync(ct);
             _channel = await _connection.CreateChannelAsync(cancellationToken: ct);
 
@@ -52,8 +54,15 @@ public class RabbitMqConsumerService(
 
             await _channel.BasicConsumeAsync(queue: _options.DataQueueName, autoAck: true, consumer: consumer, cancellationToken: ct);
             
+            logger.LogInformation("RabbitMQ consumer started successfully. Listening on queue: {QueueName}", _options.DataQueueName);
+            
             // Keep the service running indefinitely
             await Task.Delay(Timeout.Infinite, ct);
+        }
+        catch (OperationCanceledException)
+        {
+            // This is expected when the application is shutting down
+            logger.LogInformation("RabbitMQ consumer is shutting down");
         }
         catch (Exception ex)
         {
