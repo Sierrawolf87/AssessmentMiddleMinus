@@ -14,30 +14,25 @@ export class RabbitService implements OnModuleInit, OnModuleDestroy {
   private conn!: amqplib.Connection;
   private ch!: amqplib.ConfirmChannel;
 
-  private exchange!: string;
-  private exchangeType!: string;
+  private queue!: string;
 
   constructor(private readonly cfg: ConfigService) {}
 
   async onModuleInit() {
-    this.exchange = this.cfg.getOrThrow<string>('RABBITMQ_EXCHANGE', {
+    this.queue = this.cfg.getOrThrow<string>('RABBITMQ_DATA_QUEUE', {
       infer: true,
     });
-    this.exchangeType =
-      (this.cfg.get<string>('RABBITMQ_EXCHANGE_TYPE', {
-        infer: true,
-      }) as amqplib.Options.AssertExchange['type']) ?? 'topic';
 
     const url = this.buildAmqpUrl();
     this.conn = await amqplib.connect(url + "?frameMax=131072");
 
     this.ch = await this.conn.createConfirmChannel();
-    await this.ch.assertExchange(this.exchange, this.exchangeType, {
+    await this.ch.assertQueue(this.queue, {
       durable: true,
     });
 
     this.log.log(
-      `Connected to RabbitMQ. Exchange "${this.exchange}" (${this.exchangeType}) is ready`,
+      `Connected to RabbitMQ. Queue "${this.queue}" is ready`,
     );
   }
 
@@ -46,10 +41,10 @@ export class RabbitService implements OnModuleInit, OnModuleDestroy {
     await this.conn?.close().catch(() => {});
   }
 
-  async publish(reading: unknown, routingKey: string) {
+  async publish(reading: unknown) {
     const payload = Buffer.from(JSON.stringify(reading));
 
-    const ok = this.ch.publish(this.exchange, routingKey, payload, {
+    const ok = this.ch.sendToQueue(this.queue, payload, {
       contentType: 'application/json',
       persistent: true,
     });

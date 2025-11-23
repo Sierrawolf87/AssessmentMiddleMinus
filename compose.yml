@@ -1,21 +1,21 @@
 services:
-  dotnet:
-    image: ${DOTNET_IMAGE}
-    container_name: dotnetapp
+  dataProcessor:
+    image: ${DATAPROCESSOR_IMAGE}
+    container_name: dataProcessor
     build:
       context: ./Backend/DotNet/SuperApplication
-      dockerfile: SuperApplication/Dockerfile
+      dockerfile: DataProcessor/Dockerfile
     restart: unless-stopped
     environment:
       ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT}
-      ConnectionStrings__PostgresDB: "Host=${POSTGRES_CONTAINER_NAME};Port=${POSTGRES_PORT};Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}"
+      ConnectionStrings__DefaultConnection: "Host=${POSTGRES_CONTAINER_NAME};Port=${POSTGRES_PORT};Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}"
       RabbitMQ__HostName: ${RABBITMQ_CONTAINER_NAME}
       RabbitMQ__Port: ${RABBITMQ_PORT}
       RabbitMQ__UserName: ${RABBITMQ_DEFAULT_USER}
       RabbitMQ__Password: ${RABBITMQ_DEFAULT_PASS}
       RabbitMQ__VirtualHost: ${RABBITMQ_DEFAULT_VHOST}
-      RabbitMQ__Exchange: ${RABBITMQ_EXCHANGE}
-      RabbitMQ__ExchangeType: ${RABBITMQ_EXCHANGE_TYPE}
+      RabbitMQ__DataQueueName: ${RABBITMQ_DATA_QUEUE}
+      RabbitMQ__NotificationQueueName: ${RABBITMQ_NOTIFICATION_QUEUE}
     depends_on:
       postgres:
         condition: service_healthy
@@ -39,8 +39,7 @@ services:
       RABBITMQ_USER: ${RABBITMQ_DEFAULT_USER}
       RABBITMQ_PASS: ${RABBITMQ_DEFAULT_PASS}
       RABBITMQ_VHOST: ${RABBITMQ_DEFAULT_VHOST}
-      RABBITMQ_EXCHANGE: ${RABBITMQ_EXCHANGE}
-      RABBITMQ_EXCHANGE_TYPE: ${RABBITMQ_EXCHANGE_TYPE}
+      RABBITMQ_DATA_QUEUE: ${RABBITMQ_DATA_QUEUE}
     depends_on:
       postgres:
         condition: service_healthy
