@@ -1,6 +1,0 @@
-@SuperApplication_HostAddress = http://localhost:5155
-
-GET {{SuperApplication_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

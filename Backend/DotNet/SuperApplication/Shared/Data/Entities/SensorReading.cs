@@ -1,4 +1,4 @@
-namespace DataProcessor.Entities;
+namespace SuperApplication.Shared.Data.Entities;
 
 public class SensorReading
 {

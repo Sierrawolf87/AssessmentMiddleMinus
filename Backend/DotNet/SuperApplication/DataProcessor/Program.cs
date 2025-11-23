@@ -1,4 +1,4 @@
-using DataProcessor.Data;
+using SuperApplication.Shared.Data;
 using DataProcessor.Infrastructure.RabbitMQ;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
