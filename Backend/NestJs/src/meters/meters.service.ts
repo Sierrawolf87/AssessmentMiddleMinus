@@ -37,6 +37,7 @@ export class MetersService implements OnModuleInit {
   private pollIntervalMs!: number;
   private retryMaxDelayMs!: number;
   private isRequestInProgress = false;
+  private readonly extraRetryDelayMs = 3000; // Extra delay to add to Retry-After
 
   constructor(
     private readonly cfg: ConfigService,
@@ -111,19 +112,47 @@ export class MetersService implements OnModuleInit {
   }
 
   private computeRetryDelay(err: unknown, attempt: number): number {
-    if (err && typeof err === 'object' && '__retryAfterDelay' in err) {
-      const customDelay = (err as any).__retryAfterDelay;
-      if (typeof customDelay === 'number' && customDelay > 0) {
-        this.log.debug(`Using Retry-After delay: ${customDelay} ms`);
-        return Math.min(customDelay, this.retryMaxDelayMs);
+    // Check if this is a Got HTTPError with Retry-After header
+    if (err && typeof err === 'object' && 'response' in err) {
+      const httpError = err as any;
+      const retryAfterHeader = httpError.response?.headers?.[
+        'retry-after'
+      ] as string | undefined;
+
+      if (retryAfterHeader) {
+        let delaySeconds = 0;
+
+        // Parse Retry-After: can be either seconds (number) or HTTP date
+        if (/^\d+$/.test(retryAfterHeader)) {
+          // Numeric format: delay in seconds
+          delaySeconds = parseInt(retryAfterHeader, 10);
+        } else {
+          // HTTP date format
+          const retryDate = new Date(retryAfterHeader);
+          if (!isNaN(retryDate.getTime())) {
+            delaySeconds = Math.max(
+              0,
+              (retryDate.getTime() - Date.now()) / 1000,
+            );
+          }
+        }
+
+        if (delaySeconds > 0) {
+          const totalDelayMs = delaySeconds * 1000 + this.extraRetryDelayMs;
+          const cappedDelay = Math.min(totalDelayMs, this.retryMaxDelayMs);
+          this.log.debug(
+            `[Retry-After] Retry-After=${delaySeconds}s + ${this.extraRetryDelayMs}ms extra -> using ${cappedDelay}ms delay`,
+          );
+          return cappedDelay;
+        }
       }
     }
 
-    const base = this.pollIntervalMs;
-    const cap = this.retryMaxDelayMs;
-    const exp = Math.min(cap, base * 2 ** (attempt - 1));
-    const jitter = Math.floor(Math.random() * exp);
-    return Math.max(250, jitter);
+    // No Retry-After: retry immediately without delay
+    this.log.debug(
+      `[No Retry-After] Retrying immediately (attempt #${attempt})`,
+    );
+    return 0;
   }
 
   private isErrorBody(x: unknown): x is { error: string } {
