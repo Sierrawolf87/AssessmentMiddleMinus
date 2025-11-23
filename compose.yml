@@ -16,6 +16,7 @@ services:
       RabbitMQ__VirtualHost: ${RABBITMQ_DEFAULT_VHOST}
       RabbitMQ__DataQueueName: ${RABBITMQ_DATA_QUEUE}
       RabbitMQ__NotificationQueueName: ${RABBITMQ_NOTIFICATION_QUEUE}
+      MediatR__LicenseKey: ${MEDIATR_LICENSE_KEY}
     depends_on:
       postgres:
         condition: service_healthy
