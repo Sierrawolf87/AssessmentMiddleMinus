@@ -1,4 +1,4 @@
-﻿namespace DataProcessor.Entities.Dtos;
+﻿namespace SuperApplication.Shared.Models;
 
 public class SensorPayloadDto
 {

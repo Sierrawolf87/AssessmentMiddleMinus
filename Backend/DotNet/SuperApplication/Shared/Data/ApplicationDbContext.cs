@@ -1,7 +1,7 @@
-using DataProcessor.Entities;
+using SuperApplication.Shared.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace DataProcessor.Data;
+namespace SuperApplication.Shared.Data;
 
 public class ApplicationDbContext : DbContext
 {

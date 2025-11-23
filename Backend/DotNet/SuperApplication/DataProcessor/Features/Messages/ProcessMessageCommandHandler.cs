@@ -1,7 +1,7 @@
 using System.Text.Json;
-using DataProcessor.Data;
-using DataProcessor.Entities;
-using DataProcessor.Entities.Dtos;
+using SuperApplication.Shared.Data;
+using SuperApplication.Shared.Data.Entities;
+using SuperApplication.Shared.Models;
 using DataProcessor.Infrastructure.RabbitMQ;
 using MediatR;
 using Microsoft.Extensions.Options;
