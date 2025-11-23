@@ -20,6 +20,7 @@ public class ProcessMessageCommandHandler(
     public async Task Handle(ProcessMessageCommand request, CancellationToken cancellationToken)
     {
         var now = DateTime.UtcNow;
+        var notificationMessages = new List<SensorReading>();
         try
         {
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
@@ -41,10 +42,9 @@ public class ProcessMessageCommandHandler(
                         MotionDetected = msg.Payload?.MotionDetected,
                         Energy = msg.Payload?.Energy
                     };
-                    dbContext.SensorReadings.Add(reading);
                     
-                    // Send notification
-                    await producer.SendMessageAsync(reading, _options.NotificationQueueName, cancellationToken);
+                    dbContext.SensorReadings.Add(reading);
+                    notificationMessages.Add(reading);
                 }
             }
         }
@@ -54,5 +54,6 @@ public class ProcessMessageCommandHandler(
         }
 
         await dbContext.SaveChangesAsync(cancellationToken);
+        await producer.SendMessageAsync(notificationMessages, _options.NotificationQueueName, cancellationToken);
     }
 }
