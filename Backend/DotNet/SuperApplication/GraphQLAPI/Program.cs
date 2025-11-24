@@ -32,7 +32,7 @@ builder.Services
     .AddProjections()
     .ModifyPagingOptions(options =>
     {
-        options.MaxPageSize = 100;
+        options.MaxPageSize = 200;
         options.DefaultPageSize = 20;
         options.IncludeTotalCount = true;
     })
