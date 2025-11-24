@@ -1,0 +1,55 @@
+<div class="table-container">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th (click)="onSort('timestamp')" class="sortable">
+                    Time
+                    <span class="sort-indicator" *ngIf="sortField === 'timestamp'">
+                        {{ sortDirection === 'asc' ? '↑' : '↓' }}
+                    </span>
+                </th>
+                <th (click)="onSort('type')" class="sortable">
+                    Type
+                    <span class="sort-indicator" *ngIf="sortField === 'type'">
+                        {{ sortDirection === 'asc' ? '↑' : '↓' }}
+                    </span>
+                </th>
+                <th (click)="onSort('name')" class="sortable">
+                    Location
+                    <span class="sort-indicator" *ngIf="sortField === 'name'">
+                        {{ sortDirection === 'asc' ? '↑' : '↓' }}
+                    </span>
+                </th>
+                <th>CO2</th>
+                <th>PM2.5</th>
+                <th>Humidity</th>
+                <th>Motion</th>
+                <th>Energy</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let reading of data">
+                <td>{{ formatDate(reading.timestamp) }}</td>
+                <td>{{ formatType(reading.type) }}</td>
+                <td>{{ formatLocation(reading.name) }}</td>
+                <td>{{ reading.co2 ?? '-' }}</td>
+                <td>{{ reading.pm25 ?? '-' }}</td>
+                <td>{{ reading.humidity ?? '-' }}</td>
+                <td>{{ reading.motionDetected ? '✓' : '-' }}</td>
+                <td>{{ reading.energy ?? '-' }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="pagination">
+        <button class="pagination-btn" (click)="onPageChange(currentPage - 1)" [disabled]="currentPage === 1">
+            Previous
+        </button>
+        <span class="page-info">
+            Page {{ currentPage }} of {{ totalPages }} ({{ totalCount }} total)
+        </span>
+        <button class="pagination-btn" (click)="onPageChange(currentPage + 1)" [disabled]="currentPage === totalPages">
+            Next
+        </button>
+    </div>
+</div>
