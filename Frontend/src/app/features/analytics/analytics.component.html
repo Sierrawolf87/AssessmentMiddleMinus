@@ -1,0 +1,34 @@
+<div class="analytics-container">
+    <div class="filter-section">
+        <app-filter-panel [showSensorType]="false" [showEndDate]="false" (filterChange)="onFilterChange($event)"
+            (refresh)="onRefresh()" (realTimeToggle)="onRealTimeToggle($event)">
+        </app-filter-panel>
+    </div>
+
+    <div class="charts-grid">
+        <app-glass-card title="CO2 Levels">
+            <app-line-chart *ngIf="co2ChartData" [chartData]="co2ChartData" chartTitle="CO2 by Room">
+            </app-line-chart>
+        </app-glass-card>
+
+        <app-glass-card title="PM2.5 Levels">
+            <app-line-chart *ngIf="pm25ChartData" [chartData]="pm25ChartData" chartTitle="PM2.5 by Room">
+            </app-line-chart>
+        </app-glass-card>
+
+        <app-glass-card title="Humidity Levels">
+            <app-line-chart *ngIf="humidityChartData" [chartData]="humidityChartData" chartTitle="Humidity by Room">
+            </app-line-chart>
+        </app-glass-card>
+
+        <app-glass-card title="Energy Consumption">
+            <app-line-chart *ngIf="energyChartData" [chartData]="energyChartData" chartTitle="Energy Usage by Room">
+            </app-line-chart>
+        </app-glass-card>
+
+        <app-glass-card title="Motion Detection">
+            <app-line-chart *ngIf="motionChartData" [chartData]="motionChartData" chartTitle="Motion Events by Room">
+            </app-line-chart>
+        </app-glass-card>
+    </div>
+</div>

@@ -1,0 +1,5 @@
+{
+    "baseUrl": "${BASE_URL}",
+    "signalRPath": "${SIGNALR_PATH}",
+    "graphQLPath": "${GRAPHQL_PATH}"
+}

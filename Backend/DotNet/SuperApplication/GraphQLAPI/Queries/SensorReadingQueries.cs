@@ -17,7 +17,7 @@ public class SensorReadingQueries
     /// </summary>
     /// <param name="context">Database context</param>
     /// <returns>Queryable collection of sensor readings</returns>
-    [UsePaging(MaxPageSize = 100, DefaultPageSize = 20, IncludeTotalCount = true)]
+    [UsePaging(MaxPageSize = 200, DefaultPageSize = 20, IncludeTotalCount = true)]
     [UseProjection]
     [UseFiltering]
     [UseSorting]

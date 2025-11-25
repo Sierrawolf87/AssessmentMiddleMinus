@@ -1,0 +1,41 @@
+<div class="filter-panel">
+    <div class="filter-group" *ngIf="showSensorType">
+        <label for="type-filter">Sensor Type</label>
+        <select id="type-filter" [(ngModel)]="filters.type" (change)="onFilterChange()" class="filter-select">
+            <option [ngValue]="undefined">All Types</option>
+            <option *ngFor="let option of sensorTypeOptions" [value]="option.value">{{ option.label }}</option>
+        </select>
+    </div>
+
+    <div class="filter-group" *ngIf="showLocation">
+        <label for="location-filter">Location</label>
+        <select id="location-filter" [(ngModel)]="filters.location" (change)="onFilterChange()" class="filter-select">
+            <option [ngValue]="undefined">All Locations</option>
+            <option *ngFor="let option of sensorLocationOptions" [value]="option.value">{{ option.label }}</option>
+        </select>
+    </div>
+
+    <div class="filter-group">
+        <label for="start-date">Start Date</label>
+        <input id="start-date" type="datetime-local" [(ngModel)]="filters.startDate" (change)="onFilterChange()"
+            class="filter-input">
+    </div>
+
+    <div class="filter-group" *ngIf="showEndDate">
+        <label for="end-date">End Date</label>
+        <input id="end-date" type="datetime-local" [(ngModel)]="filters.endDate" (change)="onFilterChange()"
+            class="filter-input">
+    </div>
+
+    <div class="filter-group">
+        <label>
+            <input type="checkbox" [(ngModel)]="realTimeEnabled" (change)="onRealTimeToggle()" class="realtime-toggle">
+            Real-Time Updates
+        </label>
+    </div>
+
+    <div class="button-group">
+        <button class="refresh-btn" (click)="onRefresh()">🔄 Refresh</button>
+        <button class="clear-btn" (click)="clearFilters()">Clear Filters</button>
+    </div>
+</div>

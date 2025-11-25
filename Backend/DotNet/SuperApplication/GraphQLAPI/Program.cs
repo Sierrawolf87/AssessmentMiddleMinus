@@ -16,9 +16,10 @@ builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy.AllowAnyOrigin()
-              .AllowAnyHeader()
-              .AllowAnyMethod();
+        policy.AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials()
+            .SetIsOriginAllowed(_ => true); // Allow any origin for development
     });
 });
 
@@ -31,10 +32,11 @@ builder.Services
     .AddProjections()
     .ModifyPagingOptions(options =>
     {
-        options.MaxPageSize = 100;
+        options.MaxPageSize = 200;
         options.DefaultPageSize = 20;
         options.IncludeTotalCount = true;
-    });
+    })
+    .ModifyCostOptions(options => options.MaxFieldCost = 10000);
 
 var app = builder.Build();
 

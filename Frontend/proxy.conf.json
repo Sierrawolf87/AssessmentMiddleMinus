@@ -1,0 +1,13 @@
+{
+    "/graphql": {
+        "target": "http://localhost:8080",
+        "secure": false,
+        "changeOrigin": true
+    },
+    "/notifications": {
+        "target": "http://localhost:8080",
+        "secure": false,
+        "ws": true,
+        "changeOrigin": true
+    }
+}

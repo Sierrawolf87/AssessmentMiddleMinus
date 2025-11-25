@@ -1,0 +1,25 @@
+<div class="app-container">
+  <nav class="navbar">
+    <div class="nav-content">
+      <h1 class="nav-title">{{ title }}</h1>
+      <div class="nav-links">
+        <a routerLink="/dashboard" routerLinkActive="active" class="nav-link">
+          <span class="nav-icon">📊</span>
+          Dashboard
+        </a>
+        <a routerLink="/rooms" routerLinkActive="active" class="nav-link">
+          <span class="nav-icon">🏠</span>
+          Rooms
+        </a>
+        <a routerLink="/analytics" routerLinkActive="active" class="nav-link">
+          <span class="nav-icon">📈</span>
+          Analytics
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="main-content">
+    <router-outlet></router-outlet>
+  </main>
+</div>
