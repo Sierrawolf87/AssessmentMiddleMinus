@@ -52,6 +52,7 @@ jobs:
   build-and-push-images:
     name: Build and Push Docker Images
     runs-on: ubuntu-latest
+    environment: deploy
     needs: build-and-test
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
     
@@ -158,6 +159,7 @@ jobs:
   deploy:
     name: Deploy to Server
     runs-on: ubuntu-latest
+    environment: deploy
     needs: build-and-push-images
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
     
