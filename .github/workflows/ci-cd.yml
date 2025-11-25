@@ -1,0 +1,173 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  DOCKER_BUILDKIT: 1
+  COMPOSE_DOCKER_CLI_BUILD: 1
+
+jobs:
+  build-and-test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      # Build .NET projects
+      - name: Restore .NET dependencies
+        run: dotnet restore Backend/DotNet/SuperApplication/SuperApplication.sln
+
+      - name: Build .NET solution
+        run: dotnet build Backend/DotNet/SuperApplication/SuperApplication.sln --configuration Release --no-restore
+
+      # Run tests
+      - name: Run DataProcessor Tests
+        run: dotnet test Backend/DotNet/SuperApplication/DataProcessor.Tests/DataProcessor.Tests.csproj --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=dataprocessor-test-results.trx"
+
+      - name: Run GraphQLAPI Tests
+        run: dotnet test Backend/DotNet/SuperApplication/GraphQLAPI.Tests/GraphQLAPI.Tests.csproj --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=graphqlapi-test-results.trx"
+
+      - name: Run NotificationService Tests
+        run: dotnet test Backend/DotNet/SuperApplication/NotificationService.Tests/NotificationService.Tests.csproj --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=notificationservice-test-results.trx"
+
+      # Upload test results
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: '**/TestResults/*.trx'
+
+  build-and-push-images:
+    name: Build and Push Docker Images
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ secrets.DOCKER_REGISTRY_URL }}
+          username: ${{ secrets.DOCKER_REGISTRY_USERNAME }}
+          password: ${{ secrets.DOCKER_REGISTRY_PASSWORD }}
+
+      - name: Generate image tags
+        id: tags
+        run: |
+          SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
+          REGISTRY_URL=${{ secrets.DOCKER_REGISTRY_URL }}
+          echo "tag=$SHORT_SHA" >> $GITHUB_OUTPUT
+          echo "registry=$REGISTRY_URL" >> $GITHUB_OUTPUT
+
+      # Build and push DataProcessor
+      - name: Build and push DataProcessor
+        uses: docker/build-push-action@v5
+        with:
+          context: ./Backend/DotNet/SuperApplication
+          file: ./Backend/DotNet/SuperApplication/DataProcessor/Dockerfile
+          push: true
+          tags: |
+            ${{ steps.tags.outputs.registry }}/dataprocessor:latest
+            ${{ steps.tags.outputs.registry }}/dataprocessor:${{ steps.tags.outputs.tag }}
+          cache-from: type=registry,ref=${{ steps.tags.outputs.registry }}/dataprocessor:latest
+          cache-to: type=inline
+
+      # Build and push NotificationService
+      - name: Build and push NotificationService
+        uses: docker/build-push-action@v5
+        with:
+          context: ./Backend/DotNet/SuperApplication
+          file: ./Backend/DotNet/SuperApplication/NotificationService/Dockerfile
+          push: true
+          tags: |
+            ${{ steps.tags.outputs.registry }}/notificationservice:latest
+            ${{ steps.tags.outputs.registry }}/notificationservice:${{ steps.tags.outputs.tag }}
+          cache-from: type=registry,ref=${{ steps.tags.outputs.registry }}/notificationservice:latest
+          cache-to: type=inline
+
+      # Build and push GraphQLAPI
+      - name: Build and push GraphQLAPI
+        uses: docker/build-push-action@v5
+        with:
+          context: ./Backend/DotNet/SuperApplication
+          file: ./Backend/DotNet/SuperApplication/GraphQLAPI/Dockerfile
+          push: true
+          tags: |
+            ${{ steps.tags.outputs.registry }}/graphqlapi:latest
+            ${{ steps.tags.outputs.registry }}/graphqlapi:${{ steps.tags.outputs.tag }}
+          cache-from: type=registry,ref=${{ steps.tags.outputs.registry }}/graphqlapi:latest
+          cache-to: type=inline
+
+      # Build and push NestJS
+      - name: Build and push NestJS
+        uses: docker/build-push-action@v5
+        with:
+          context: ./Backend/NestJs
+          file: ./Backend/NestJs/Dockerfile
+          push: true
+          tags: |
+            ${{ steps.tags.outputs.registry }}/nestjs:latest
+            ${{ steps.tags.outputs.registry }}/nestjs:${{ steps.tags.outputs.tag }}
+          cache-from: type=registry,ref=${{ steps.tags.outputs.registry }}/nestjs:latest
+          cache-to: type=inline
+
+      # Build and push Frontend
+      - name: Build and push Frontend
+        uses: docker/build-push-action@v5
+        with:
+          context: ./Frontend
+          file: ./Frontend/Dockerfile
+          push: true
+          tags: |
+            ${{ steps.tags.outputs.registry }}/frontend:latest
+            ${{ steps.tags.outputs.registry }}/frontend:${{ steps.tags.outputs.tag }}
+          cache-from: type=registry,ref=${{ steps.tags.outputs.registry }}/frontend:latest
+          cache-to: type=inline
+
+      # Build and push Nginx
+      - name: Build and push Nginx
+        uses: docker/build-push-action@v5
+        with:
+          context: ./nginx
+          file: ./nginx/Dockerfile
+          push: true
+          tags: |
+            ${{ steps.tags.outputs.registry }}/nginx:latest
+            ${{ steps.tags.outputs.registry }}/nginx:${{ steps.tags.outputs.tag }}
+          cache-from: type=registry,ref=${{ steps.tags.outputs.registry }}/nginx:latest
+          cache-to: type=inline
+
+  deploy:
+    name: Deploy to Server
+    runs-on: ubuntu-latest
+    needs: build-and-push-images
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /root/ass
+            docker compose pull
+            docker compose up -d
