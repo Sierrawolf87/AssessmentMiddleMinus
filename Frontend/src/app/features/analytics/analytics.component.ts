@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, ViewChildren, QueryList } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, takeUntil, concatMap } from 'rxjs';
 import { GlassCardComponent } from '../../shared/components/glass-card/glass-card.component';
 import { LineChartComponent } from '../../shared/components/line-chart/line-chart.component';
 import { FilterPanelComponent, FilterOptions } from '../../shared/components/filter-panel/filter-panel.component';
@@ -22,7 +22,9 @@ export class AnalyticsComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   private realTimeSubscription: any;
   
-  airQualityChartData: any;
+  co2ChartData: any;
+  pm25ChartData: any;
+  humidityChartData: any;
   energyChartData: any;
   motionChartData: any;
   
@@ -35,7 +37,6 @@ export class AnalyticsComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    // Load initial data
     this.loadChartData();
   }
 
@@ -48,112 +49,229 @@ export class AnalyticsComponent implements OnInit, OnDestroy {
   }
 
   loadChartData() {
-    this.loadAirQualityData();
+    this.loadCO2Data();
+    this.loadPM25Data();
+    this.loadHumidityData();
     this.loadEnergyData();
     this.loadMotionData();
   }
 
-  loadAirQualityData() {
+  loadCO2Data() {
     const where = this.buildWhereFilter(SensorType.AirQuality);
-    
-    this.sensorService.getReadings(0, 200, where, [{ timestamp: 'ASC' }])
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (data) => {
-          this.airQualityChartData = this.buildChartData(data?.items ?? [], ['co2', 'pm25', 'humidity']);
-          this.updateChart(0);
-        },
-        error: (err) => console.error('Error loading air quality data:', err)
-      });
+    this.loadAllData(where, [{ timestamp: 'ASC' }]).subscribe({
+      next: (allData: SensorReading[]) => {
+        this.co2ChartData = this.buildChartData(allData, ['co2']);
+        this.updateChart(0);
+      },
+      error: (err: any) => console.error('Error loading CO2 data:', err)
+    });
+  }
+
+  loadPM25Data() {
+    const where = this.buildWhereFilter(SensorType.AirQuality);
+    this.loadAllData(where, [{ timestamp: 'ASC' }]).subscribe({
+      next: (allData: SensorReading[]) => {
+        this.pm25ChartData = this.buildChartData(allData, ['pm25']);
+        this.updateChart(1);
+      },
+      error: (err: any) => console.error('Error loading PM2.5 data:', err)
+    });
+  }
+
+  loadHumidityData() {
+    const where = this.buildWhereFilter(SensorType.AirQuality);
+    this.loadAllData(where, [{ timestamp: 'ASC' }]).subscribe({
+      next: (allData: SensorReading[]) => {
+        this.humidityChartData = this.buildChartData(allData, ['humidity']);
+        this.updateChart(2);
+      },
+      error: (err: any) => console.error('Error loading Humidity data:', err)
+    });
   }
 
   loadEnergyData() {
     const where = this.buildWhereFilter(SensorType.Energy);
-    
-    this.sensorService.getReadings(0, 200, where, [{ timestamp: 'ASC' }])
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (data) => {
-          this.energyChartData = this.buildChartData(data?.items ?? [], ['energy']);
-          this.updateChart(1);
-        },
-        error: (err) => console.error('Error loading energy data:', err)
-      });
+    this.loadAllData(where, [{ timestamp: 'ASC' }]).subscribe({
+      next: (allData: SensorReading[]) => {
+        this.energyChartData = this.buildChartData(allData, ['energy']);
+        this.updateChart(3);
+      },
+      error: (err: any) => console.error('Error loading energy data:', err)
+    });
   }
 
   loadMotionData() {
     const where = this.buildWhereFilter(SensorType.Motion);
-    
-    this.sensorService.getReadings(0, 200, where, [{ timestamp: 'ASC' }])
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (data) => {
-          this.motionChartData = this.buildMotionChartData(data?.items ?? []);
-          this.updateChart(2);
-        },
-        error: (err) => console.error('Error loading motion data:', err)
-      });
+    this.loadAllData(where, [{ timestamp: 'ASC' }]).subscribe({
+      next: (allData: SensorReading[]) => {
+        this.motionChartData = this.buildMotionChartData(allData);
+        this.updateChart(4);
+      },
+      error: (err: any) => console.error('Error loading motion data:', err)
+    });
   }
 
-  private buildChartData(readings: SensorReading[], fields: string[]) {
-    const locations = Object.values(SensorLocation);
+  private loadAllData(where: any, order: any[]): any {
+    const allItems: SensorReading[] = [];
     
-    // Get unique timestamps for labels
-    const labels = [...new Set(readings.map(r => new Date(r.timestamp).toLocaleTimeString()))];
+    const loadPage = (cursor: string | null = null): any => {
+      return this.sensorService.getReadings(200, cursor, where, order).pipe(
+        takeUntil(this.destroy$),
+        concatMap((data) => {
+          // Add items from current page
+          if (data?.items) {
+            allItems.push(...data.items);
+          }
+          
+          // If there's a next page, fetch it recursively
+          if (data?.pageInfo?.hasNextPage && data?.pageInfo?.endCursor) {
+            return loadPage(data.pageInfo.endCursor);
+          } else {
+            // No more pages, return all accumulated data
+            return [allItems];
+          }
+        })
+      );
+    };
     
-    const datasets = locations.flatMap(location => {
-      const locationReadings = readings.filter(r => r.name === location);
-      
-      return fields.map(field => ({
-        label: `${location} - ${field}`,
-        data: locationReadings.map(r => (r as any)[field] ?? 0),
-        borderColor: this.getColorForLocation(location),
-        backgroundColor: this.getColorForLocation(location) + '33',
-        tension: 0.4
+    return loadPage();
+  }
+
+  private buildChartData(data: SensorReading[], valueFields: string[]) {
+    if (!data || data.length === 0) return null;
+
+    // Get the time range
+    let startTime: Date;
+    if (this.filters.startDate) {
+      startTime = new Date(this.filters.startDate);
+    } else {
+      startTime = new Date(Date.now() - 30 * 60 * 1000);
+    }
+    const endTime = new Date(startTime.getTime() + 30 * 60 * 1000);
+
+    // Generate labels for 30-minute range (every minute) in 24-hour format
+    const labels: string[] = [];
+    for (let time = new Date(startTime); time <= endTime; time = new Date(time.getTime() + 60 * 1000)) {
+      labels.push(time.toLocaleTimeString('en-GB', { 
+        hour: '2-digit', 
+        minute: '2-digit',
+        hour12: false 
       }));
+    }
+
+    // Group data by location - simplified approach
+    const grouped: { [key: string]: any } = {};
+    data.forEach(reading => {
+      const location = reading.name || 'Unknown';
+      const timeLabel = new Date(reading.timestamp).toLocaleTimeString('en-GB', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      });
+      
+      if (!grouped[location]) {
+        grouped[location] = {};
+      }
+      grouped[location][timeLabel] = reading;
     });
 
-    return {
-      labels,
-      datasets
-    };
+    // Create datasets
+    const datasets: any[] = [];
+    const colors = this.generateColors(Object.keys(grouped).length * valueFields.length);
+    let colorIndex = 0;
+
+    Object.entries(grouped).forEach(([location, timeData]: [string, any]) => {
+      valueFields.forEach(field => {
+        datasets.push({
+          label: `${location} - ${field.toUpperCase()}`,
+          data: labels.map(label => {
+            const reading = timeData[label];
+            return reading?.[field] ?? null;
+          }),
+          borderColor: colors[colorIndex],
+          backgroundColor: colors[colorIndex] + '20',
+          borderWidth: 2,
+tension: 0.4,
+          spanGaps: true
+        });
+        colorIndex++;
+      });
+    });
+
+    return { labels, datasets };
   }
 
-  private buildMotionChartData(readings: SensorReading[]) {
-    const locations = Object.values(SensorLocation);
-    
-    // Get unique timestamps for labels
-    const labels = [...new Set(readings.map(r => new Date(r.timestamp).toLocaleTimeString()))];
-    
-    const datasets = locations.map(location => {
-      const locationReadings = readings.filter(r => r.name === location);
+  private buildMotionChartData(data: SensorReading[]) {
+    if (!data || data.length === 0) return null;
+
+    // Get the time range
+    let startTime: Date;
+    if (this.filters.startDate) {
+      startTime = new Date(this.filters.startDate);
+    } else {
+      startTime = new Date(Date.now() - 30 * 60 * 1000);
+    }
+    const endTime = new Date(startTime.getTime() + 30 * 60 * 1000);
+
+    // Generate labels for 30-minute range in 24-hour format
+    const labels: string[] = [];
+    for (let time = new Date(startTime); time <= endTime; time = new Date(time.getTime() + 60 * 1000)) {
+      labels.push(time.toLocaleTimeString('en-GB', { 
+        hour: '2-digit', 
+        minute: '2-digit',
+        hour12: false 
+      }));
+    }
+
+    // Group data by location
+    const grouped: { [key: string]: any } = {};
+    data.forEach(reading => {
+      const location = reading.name || 'Unknown';
+      const timeLabel = new Date(reading.timestamp).toLocaleTimeString('en-GB', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      });
       
-      return {
+      if (!grouped[location]) {
+        grouped[location] = {};
+      }
+      grouped[location][timeLabel] = reading;
+    });
+
+    // Create datasets
+    const datasets: any[] = [];
+    const colors = this.generateColors(Object.keys(grouped).length);
+    let colorIndex = 0;
+
+    Object.entries(grouped).forEach(([location, timeData]: [string, any]) => {
+      datasets.push({
         label: location,
-        data: locationReadings.map(r => r.motionDetected ? 1 : 0),
-        borderColor: this.getColorForLocation(location),
-        backgroundColor: this.getColorForLocation(location) + '33',
+        data: labels.map(label => {
+          const reading = timeData[label];
+          return reading?.motionDetected ? 1 : 0;
+        }),
+        borderColor: colors[colorIndex],
+        backgroundColor: colors[colorIndex] + '33',
         tension: 0.1,
         stepped: true
-      };
+      });
+      colorIndex++;
     });
 
-    return {
-      labels,
-      datasets
-    };
+    return { labels, datasets };
   }
 
-  private getColorForLocation(location: SensorLocation): string {
-    const colors: Record<string, string> = {
-      [SensorLocation.Kitchen]: '#ef4444',
-      [SensorLocation.Garage]: '#f59e0b',
-      [SensorLocation.Bedroom]: '#8b5cf6',
-      [SensorLocation.LivingRoom]: '#10b981',
-      [SensorLocation.Office]: '#3b82f6',
-      [SensorLocation.Corridor]: '#ec4899'
-    };
-    return colors[location] || '#6b7280';
+  private generateColors(count: number): string[] {
+    const baseColors = [
+      '#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ec4899',
+      '#14b8a6', '#f97316', '#06b6d4', '#a855f7', '#84cc16', '#f43f5e'
+    ];
+    const colors: string[] = [];
+    for (let i = 0; i < count; i++) {
+      colors.push(baseColors[i % baseColors.length]);
+    }
+    return colors;
   }
 
   onFilterChange(filters: FilterOptions) {
@@ -189,20 +307,28 @@ export class AnalyticsComponent implements OnInit, OnDestroy {
       where.name = { eq: this.filters.location };
     }
     
-    // If no date filters are provided, default to last 30 minutes
-    if (!this.filters.startDate && !this.filters.endDate) {
-      const now = new Date();
-      const thirtyMinutesAgo = new Date(now.getTime() - 30 * 60 * 1000);
-      where.timestamp = { gte: thirtyMinutesAgo.toISOString() };
+    // Time logic: 30 minutes from Start Date or current time
+    let startTime: Date;
+    if (this.filters.startDate) {
+      startTime = new Date(this.filters.startDate);
     } else {
-      // Apply custom date filters if provided
-      if (this.filters.startDate) {
-        where.timestamp = { ...where.timestamp, gte: new Date(this.filters.startDate).toISOString() };
-      }
-      if (this.filters.endDate) {
-        where.timestamp = { ...where.timestamp, lte: new Date(this.filters.endDate).toISOString() };
-      }
+      // Default: current time minus 30 minutes
+      startTime = new Date(Date.now() - 30 * 60 * 1000);
     }
+    
+    // End time is always 30 minutes after start time
+    const endTime = new Date(startTime.getTime() + 30 * 60 * 1000);
+    
+    where.timestamp = {
+      gte: startTime.toISOString(),
+      lte: endTime.toISOString()
+    };
+    
+    console.log('Chart filter - 30 minute window:', {
+      from: startTime.toISOString(),
+      to: endTime.toISOString(),
+      type: type
+    });
     
     return where;
   }
@@ -211,7 +337,13 @@ export class AnalyticsComponent implements OnInit, OnDestroy {
     setTimeout(() => {
       const charts = this.chartComponents?.toArray();
       if (charts && charts[index]) {
-        const chartData = [this.airQualityChartData, this.energyChartData, this.motionChartData][index];
+        const chartData = [
+          this.co2ChartData, 
+          this.pm25ChartData, 
+          this.humidityChartData,
+          this.energyChartData, 
+          this.motionChartData
+        ][index];
         if (chartData) {
           charts[index].updateChart(chartData);
         }

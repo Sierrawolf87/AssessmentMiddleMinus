@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { SensorReading } from '../../../core/models/sensor-reading.model';
 import { SensorType, SensorLocation } from '../../../core/models/enums';
 import { getSensorTypeLabel, getSensorLocationLabel } from '../../../core/utils/enum.utils';
+import { PageInfo } from '../../../core/services/graphql.service';
 
 @Component({
   selector: 'app-data-table',
@@ -16,8 +17,10 @@ export class DataTableComponent {
   @Input() totalCount: number = 0;
   @Input() currentPage: number = 1;
   @Input() pageSize: number = 20;
+  @Input() pageInfo?: PageInfo;
+  @Input() showLocationColumn: boolean = true;
   
-  @Output() pageChange = new EventEmitter<number>();
+  @Output() pageChange = new EventEmitter<'next' | 'prev'>();
   @Output() sortChange = new EventEmitter<{field: string, direction: 'asc' | 'desc'}>();
 
   sortField: string = 'timestamp';
@@ -25,6 +28,14 @@ export class DataTableComponent {
 
   get totalPages(): number {
     return Math.ceil(this.totalCount / this.pageSize);
+  }
+
+  get canGoNext(): boolean {
+    return this.pageInfo?.hasNextPage ?? false;
+  }
+
+  get canGoPrev(): boolean {
+    return this.currentPage > 1;
   }
 
   onSort(field: string) {
@@ -37,15 +48,29 @@ export class DataTableComponent {
     this.sortChange.emit({ field: this.sortField, direction: this.sortDirection });
   }
 
-  onPageChange(page: number) {
-    if (page >= 1 && page <= this.totalPages) {
-      this.pageChange.emit(page);
+  onNext() {
+    if (this.canGoNext) {
+      this.pageChange.emit('next');
+    }
+  }
+
+  onPrev() {
+    if (this.canGoPrev) {
+      this.pageChange.emit('prev');
     }
   }
 
   formatDate(dateString: string): string {
     const date = new Date(dateString);
-    return date.toLocaleString();
+    return date.toLocaleString('en-GB', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    });
   }
 
   formatType(type: SensorType): string {

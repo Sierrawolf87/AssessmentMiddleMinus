@@ -5,6 +5,19 @@ import { map } from 'rxjs/operators';
 import { SensorReading, SensorReadingStats } from '../models/sensor-reading.model';
 import { SensorLocation, SensorType } from '../models/enums';
 
+export interface PageInfo {
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+  startCursor?: string;
+  endCursor?: string;
+}
+
+export interface PaginatedResult {
+  items: SensorReading[];
+  totalCount: number;
+  pageInfo: PageInfo;
+}
+
 const GET_SENSOR_READINGS = gql`
   query GetSensorReadings($first: Int, $after: String, $where: SensorReadingFilterInput, $order: [SensorReadingSortInput!]) {
     sensorReadings(first: $first, after: $after, where: $where, order: $order) {
@@ -54,37 +67,34 @@ export class GraphqlService {
 
   constructor(private apollo: Apollo) { }
 
-  getSensorReadings(skip: number = 0, take: number = 20, where?: any, order?: any): Observable<{ items: SensorReading[], totalCount: number, endCursor?: string }> {
-    // Backend uses cursor-based pagination, not offset-based
-    // We'll fetch larger pages to reduce pagination issues
-    // In a production app, we'd implement proper cursor management
-    const actualTake = skip === 0 ? take : Math.min(100, take * 5); // Fetch more on subsequent pages
-    
+  /**
+   * Get sensor readings using cursor-based pagination
+   * @param take - Number of items to fetch
+   * @param after - Cursor to fetch items after (for next page)
+   * @param where - Filter conditions
+   * @param order - Sort order
+   */
+  getSensorReadings(take: number = 20, after?: string | null, where?: any, order?: any): Observable<PaginatedResult> {
     return this.apollo.query<any>({
       query: GET_SENSOR_READINGS,
       variables: {
-        first: actualTake,
-        after: null,
+        first: take,
+        after: after || null,
         where,
         order
       },
       fetchPolicy: 'network-only'
     }).pipe(
-      map(result => {
-        const allItems = result.data?.sensorReadings?.nodes ?? [];
-        const totalCount = result.data?.sensorReadings?.totalCount ?? 0;
-        
-        // Client-side pagination emulation
-        const startIndex = skip;
-        const endIndex = skip + take;
-        const items = allItems.slice(startIndex, endIndex);
-        
-        return {
-          items,
-          totalCount,
+      map(result => ({
+        items: result.data?.sensorReadings?.nodes ?? [],
+        totalCount: result.data?.sensorReadings?.totalCount ?? 0,
+        pageInfo: {
+          hasNextPage: result.data?.sensorReadings?.pageInfo?.hasNextPage ?? false,
+          hasPreviousPage: result.data?.sensorReadings?.pageInfo?.hasPreviousPage ?? false,
+          startCursor: result.data?.sensorReadings?.pageInfo?.startCursor,
           endCursor: result.data?.sensorReadings?.pageInfo?.endCursor
-        };
-      })
+        }
+      }))
     );
   }
 

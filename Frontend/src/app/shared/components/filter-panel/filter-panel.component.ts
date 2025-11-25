@@ -1,4 +1,4 @@
-import { Component, Output, EventEmitter } from '@angular/core';
+import { Component, Output, EventEmitter, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SensorType, SensorLocation } from '../../../core/models/enums';
@@ -20,6 +20,10 @@ export interface FilterOptions {
   styleUrls: ['./filter-panel.component.css']
 })
 export class FilterPanelComponent {
+  @Input() showSensorType: boolean = true;
+  @Input() showLocation: boolean = true;
+  @Input() showEndDate: boolean = true;
+  
   @Output() filterChange = new EventEmitter<FilterOptions>();
   @Output() refresh = new EventEmitter<void>();
   @Output() realTimeToggle = new EventEmitter<boolean>();

@@ -5,7 +5,7 @@
         </app-filter-panel>
 
         <app-data-table [data]="readings" [totalCount]="totalCount" [currentPage]="currentPage" [pageSize]="pageSize"
-            (pageChange)="onPageChange($event)" (sortChange)="onSortChange($event)">
+            [pageInfo]="pageInfo" (pageChange)="onPageChange($event)" (sortChange)="onSortChange($event)">
         </app-data-table>
     </app-glass-card>
 </div>

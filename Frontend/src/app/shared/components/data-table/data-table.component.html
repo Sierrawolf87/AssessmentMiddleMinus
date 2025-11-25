@@ -14,7 +14,7 @@
                         {{ sortDirection === 'asc' ? '↑' : '↓' }}
                     </span>
                 </th>
-                <th (click)="onSort('name')" class="sortable">
+                <th (click)="onSort('name')" class="sortable" *ngIf="showLocationColumn">
                     Location
                     <span class="sort-indicator" *ngIf="sortField === 'name'">
                         {{ sortDirection === 'asc' ? '↑' : '↓' }}
@@ -31,7 +31,7 @@
             <tr *ngFor="let reading of data">
                 <td>{{ formatDate(reading.timestamp) }}</td>
                 <td>{{ formatType(reading.type) }}</td>
-                <td>{{ formatLocation(reading.name) }}</td>
+                <td *ngIf="showLocationColumn">{{ formatLocation(reading.name) }}</td>
                 <td>{{ reading.co2 ?? '-' }}</td>
                 <td>{{ reading.pm25 ?? '-' }}</td>
                 <td>{{ reading.humidity ?? '-' }}</td>
@@ -42,13 +42,13 @@
     </table>
 
     <div class="pagination">
-        <button class="pagination-btn" (click)="onPageChange(currentPage - 1)" [disabled]="currentPage === 1">
+        <button class="pagination-btn" (click)="onPrev()" [disabled]="!canGoPrev">
             Previous
         </button>
         <span class="page-info">
-            Page {{ currentPage }} of {{ totalPages }} ({{ totalCount }} total)
+            Page {{ currentPage }} ({{ totalCount }} total)
         </span>
-        <button class="pagination-btn" (click)="onPageChange(currentPage + 1)" [disabled]="currentPage === totalPages">
+        <button class="pagination-btn" (click)="onNext()" [disabled]="!canGoNext">
             Next
         </button>
     </div>

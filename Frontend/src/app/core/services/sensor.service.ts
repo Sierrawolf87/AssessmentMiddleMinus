@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable, Subject, interval, merge } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { GraphqlService } from './graphql.service';
+import { GraphqlService, PaginatedResult } from './graphql.service';
 import { SignalrService } from './signalr.service';
 import { SensorReading, SensorReadingStats, SensorMessageDto } from '../models/sensor-reading.model';
 import { SensorType, SensorLocation } from '../models/enums';
@@ -25,8 +25,8 @@ export class SensorService {
     });
   }
 
-  getReadings(skip: number = 0, take: number = 20, where?: any, order?: any): Observable<{ items: SensorReading[], totalCount: number }> {
-    return this.graphqlService.getSensorReadings(skip, take, where, order);
+  getReadings(take: number = 20, after?: string | null, where?: any, order?: any): Observable<PaginatedResult> {
+    return this.graphqlService.getSensorReadings(take, after, where, order);
   }
 
   getStats(type?: SensorType, name?: SensorLocation, startDate?: Date, endDate?: Date): Observable<SensorReadingStats> {

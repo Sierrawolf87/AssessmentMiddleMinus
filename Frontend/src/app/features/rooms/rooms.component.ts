@@ -7,12 +7,20 @@ import { FilterPanelComponent, FilterOptions } from '../../shared/components/fil
 import { SensorService } from '../../core/services/sensor.service';
 import { SensorReading } from '../../core/models/sensor-reading.model';
 import { SensorLocation } from '../../core/models/enums';
+import { PageInfo } from '../../core/services/graphql.service';
 
 interface RoomData {
   location: SensorLocation;
   readings: SensorReading[];
   totalCount: number;
   currentPage: number;
+  pageInfo?: PageInfo;
+  // Cursor history for pagination
+  cursorHistory: (string | null)[];
+  currentCursorIndex: number;
+  // Sorting
+  sortField: string;
+  sortDirection: 'asc' | 'desc';
 }
 
 @Component({
@@ -53,7 +61,11 @@ export class RoomsComponent implements OnInit, OnDestroy {
       location,
       readings: [],
       totalCount: 0,
-      currentPage: 1
+      currentPage: 1,
+      cursorHistory: [null], // Start with null for first page
+      currentCursorIndex: 0,
+      sortField: 'timestamp',
+      sortDirection: 'desc' as 'asc' | 'desc'
     }));
   }
 
@@ -62,16 +74,17 @@ export class RoomsComponent implements OnInit, OnDestroy {
   }
 
   loadRoomData(room: RoomData) {
-    const skip = (room.currentPage - 1) * this.pageSize;
+    const currentCursor = room.cursorHistory[room.currentCursorIndex];
     const where = this.buildWhereFilter(room.location);
-    const order = [{ timestamp: 'DESC' }];
+    const order = [{ [room.sortField]: room.sortDirection.toUpperCase() }];
 
-    this.sensorService.getReadings(skip, this.pageSize, where, order)
+    this.sensorService.getReadings(this.pageSize, currentCursor, where, order)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (data) => {
           room.readings = data?.items ?? [];
           room.totalCount = data?.totalCount ?? 0;
+          room.pageInfo = data?.pageInfo;
         },
         error: (err) => console.error(`Error loading data for ${room.location}:`, err)
       });
@@ -79,7 +92,12 @@ export class RoomsComponent implements OnInit, OnDestroy {
 
   onFilterChange(filters: FilterOptions) {
     this.filters = filters;
-    this.rooms.forEach(room => room.currentPage = 1);
+    // Reset pagination for all rooms when filters change
+    this.rooms.forEach(room => {
+      room.currentPage = 1;
+      room.cursorHistory = [null];
+      room.currentCursorIndex = 0;
+    });
     this.loadAllRoomsData();
   }
 
@@ -104,12 +122,35 @@ export class RoomsComponent implements OnInit, OnDestroy {
     }
   }
 
-  onPageChange(room: RoomData, page: number) {
-    room.currentPage = page;
+  onPageChange(room: RoomData, direction: 'next' | 'prev') {
+    if (direction === 'next' && room.pageInfo?.hasNextPage) {
+      // Moving forward
+      room.currentCursorIndex++;
+      room.currentPage++;
+      
+      // Add new cursor if we don't have it yet
+      if (room.currentCursorIndex >= room.cursorHistory.length) {
+        room.cursorHistory.push(room.pageInfo.endCursor || null);
+      }
+    } else if (direction === 'prev' && room.currentPage > 1) {
+      // Moving backward
+      room.currentCursorIndex--;
+      room.currentPage--;
+    }
+    
     this.loadRoomData(room);
   }
 
   onSortChange(room: RoomData, sort: {field: string, direction: 'asc' | 'desc'}) {
+    // Update room's sort parameters
+    room.sortField = sort.field;
+    room.sortDirection = sort.direction;
+    
+    // Reset pagination when sort changes
+    room.currentPage = 1;
+    room.cursorHistory = [null];
+    room.currentCursorIndex = 0;
+    
     // Reload data with new sort
     this.loadRoomData(room);
   }
@@ -128,5 +169,14 @@ export class RoomsComponent implements OnInit, OnDestroy {
     }
     
     return where;
+  }
+
+  formatRoomName(location: SensorLocation): string {
+    // Convert "LIVING_ROOM" to "Living room"
+    return location
+      .toLowerCase()
+      .split('_')
+      .map((word, index) => index === 0 ? word.charAt(0).toUpperCase() + word.slice(1) : word)
+      .join(' ');
   }
 }

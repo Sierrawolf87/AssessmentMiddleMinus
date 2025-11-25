@@ -44,6 +44,7 @@ export class LineChartComponent implements AfterViewInit, OnDestroy {
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        animation: false, // Disable animations to prevent flickering on updates
         plugins: {
           legend: {
             display: true  // Disable legend to prevent overflow

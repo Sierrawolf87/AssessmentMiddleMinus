@@ -1,15 +1,15 @@
 <div class="rooms-container">
     <div class="filter-section">
-        <app-filter-panel (filterChange)="onFilterChange($event)" (refresh)="onRefresh()"
+        <app-filter-panel [showLocation]="false" (filterChange)="onFilterChange($event)" (refresh)="onRefresh()"
             (realTimeToggle)="onRealTimeToggle($event)">
         </app-filter-panel>
     </div>
 
     <div class="rooms-grid">
-        <app-glass-card *ngFor="let room of rooms" [title]="room.location">
+        <app-glass-card *ngFor="let room of rooms" [title]="formatRoomName(room.location)">
             <app-data-table [data]="room.readings" [totalCount]="room.totalCount" [currentPage]="room.currentPage"
-                [pageSize]="pageSize" (pageChange)="onPageChange(room, $event)"
-                (sortChange)="onSortChange(room, $event)">
+                [pageSize]="pageSize" [pageInfo]="room.pageInfo" [showLocationColumn]="false"
+                (pageChange)="onPageChange(room, $event)" (sortChange)="onSortChange(room, $event)">
             </app-data-table>
         </app-glass-card>
     </div>

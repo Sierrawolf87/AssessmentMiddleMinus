@@ -1,5 +1,5 @@
 <div class="filter-panel">
-    <div class="filter-group">
+    <div class="filter-group" *ngIf="showSensorType">
         <label for="type-filter">Sensor Type</label>
         <select id="type-filter" [(ngModel)]="filters.type" (change)="onFilterChange()" class="filter-select">
             <option [ngValue]="undefined">All Types</option>
@@ -7,7 +7,7 @@
         </select>
     </div>
 
-    <div class="filter-group">
+    <div class="filter-group" *ngIf="showLocation">
         <label for="location-filter">Location</label>
         <select id="location-filter" [(ngModel)]="filters.location" (change)="onFilterChange()" class="filter-select">
             <option [ngValue]="undefined">All Locations</option>
@@ -21,7 +21,7 @@
             class="filter-input">
     </div>
 
-    <div class="filter-group">
+    <div class="filter-group" *ngIf="showEndDate">
         <label for="end-date">End Date</label>
         <input id="end-date" type="datetime-local" [(ngModel)]="filters.endDate" (change)="onFilterChange()"
             class="filter-input">
