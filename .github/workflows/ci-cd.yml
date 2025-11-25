@@ -4,6 +4,11 @@ on:
   push:
     branches:
       - main
+      - master
+      - develop
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
 
 env:
@@ -54,7 +59,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: deploy
     needs: build-and-test
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
     
     steps:
       - name: Checkout code
@@ -161,7 +166,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: deploy
     needs: build-and-push-images
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
     
     steps:
       - name: Deploy via SSH
