@@ -61,6 +61,28 @@ jobs:
     needs: build-and-test
     if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
     
+    strategy:
+      matrix:
+        service:
+          - name: dataprocessor
+            context: ./Backend/DotNet/SuperApplication
+            dockerfile: ./Backend/DotNet/SuperApplication/DataProcessor/Dockerfile
+          - name: notificationservice
+            context: ./Backend/DotNet/SuperApplication
+            dockerfile: ./Backend/DotNet/SuperApplication/NotificationService/Dockerfile
+          - name: graphqlapi
+            context: ./Backend/DotNet/SuperApplication
+            dockerfile: ./Backend/DotNet/SuperApplication/GraphQLAPI/Dockerfile
+          - name: nestjs
+            context: ./Backend/NestJs
+            dockerfile: ./Backend/NestJs/Dockerfile
+          - name: frontend
+            context: ./Frontend
+            dockerfile: ./Frontend/Dockerfile
+          - name: nginx
+            context: ./nginx
+            dockerfile: ./nginx/Dockerfile
+    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -83,82 +105,16 @@ jobs:
           echo "tag=$SHORT_SHA" >> $GITHUB_OUTPUT
           echo "registry=$REGISTRY_URL" >> $GITHUB_OUTPUT
 
-      # Build and push DataProcessor
-      - name: Build and push DataProcessor
+      - name: Build and push ${{ matrix.service.name }}
         uses: docker/build-push-action@v5
         with:
-          context: ./Backend/DotNet/SuperApplication
-          file: ./Backend/DotNet/SuperApplication/DataProcessor/Dockerfile
+          context: ${{ matrix.service.context }}
+          file: ${{ matrix.service.dockerfile }}
           push: true
           tags: |
-            ${{ steps.tags.outputs.registry }}/dataprocessor:latest
-            ${{ steps.tags.outputs.registry }}/dataprocessor:${{ steps.tags.outputs.tag }}
-          cache-from: type=registry,ref=${{ steps.tags.outputs.registry }}/dataprocessor:latest
-          cache-to: type=inline
-
-      # Build and push NotificationService
-      - name: Build and push NotificationService
-        uses: docker/build-push-action@v5
-        with:
-          context: ./Backend/DotNet/SuperApplication
-          file: ./Backend/DotNet/SuperApplication/NotificationService/Dockerfile
-          push: true
-          tags: |
-            ${{ steps.tags.outputs.registry }}/notificationservice:latest
-            ${{ steps.tags.outputs.registry }}/notificationservice:${{ steps.tags.outputs.tag }}
-          cache-from: type=registry,ref=${{ steps.tags.outputs.registry }}/notificationservice:latest
-          cache-to: type=inline
-
-      # Build and push GraphQLAPI
-      - name: Build and push GraphQLAPI
-        uses: docker/build-push-action@v5
-        with:
-          context: ./Backend/DotNet/SuperApplication
-          file: ./Backend/DotNet/SuperApplication/GraphQLAPI/Dockerfile
-          push: true
-          tags: |
-            ${{ steps.tags.outputs.registry }}/graphqlapi:latest
-            ${{ steps.tags.outputs.registry }}/graphqlapi:${{ steps.tags.outputs.tag }}
-          cache-from: type=registry,ref=${{ steps.tags.outputs.registry }}/graphqlapi:latest
-          cache-to: type=inline
-
-      # Build and push NestJS
-      - name: Build and push NestJS
-        uses: docker/build-push-action@v5
-        with:
-          context: ./Backend/NestJs
-          file: ./Backend/NestJs/Dockerfile
-          push: true
-          tags: |
-            ${{ steps.tags.outputs.registry }}/nestjs:latest
-            ${{ steps.tags.outputs.registry }}/nestjs:${{ steps.tags.outputs.tag }}
-          cache-from: type=registry,ref=${{ steps.tags.outputs.registry }}/nestjs:latest
-          cache-to: type=inline
-
-      # Build and push Frontend
-      - name: Build and push Frontend
-        uses: docker/build-push-action@v5
-        with:
-          context: ./Frontend
-          file: ./Frontend/Dockerfile
-          push: true
-          tags: |
-            ${{ steps.tags.outputs.registry }}/frontend:latest
-            ${{ steps.tags.outputs.registry }}/frontend:${{ steps.tags.outputs.tag }}
-          cache-from: type=registry,ref=${{ steps.tags.outputs.registry }}/frontend:latest
-          cache-to: type=inline
-
-      # Build and push Nginx
-      - name: Build and push Nginx
-        uses: docker/build-push-action@v5
-        with:
-          context: ./nginx
-          file: ./nginx/Dockerfile
-          push: true
-          tags: |
-            ${{ steps.tags.outputs.registry }}/nginx:latest
-            ${{ steps.tags.outputs.registry }}/nginx:${{ steps.tags.outputs.tag }}
-          cache-from: type=registry,ref=${{ steps.tags.outputs.registry }}/nginx:latest
+            ${{ steps.tags.outputs.registry }}/${{ matrix.service.name }}:latest
+            ${{ steps.tags.outputs.registry }}/${{ matrix.service.name }}:${{ steps.tags.outputs.tag }}
+          cache-from: type=registry,ref=${{ steps.tags.outputs.registry }}/${{ matrix.service.name }}:latest
           cache-to: type=inline
 
   deploy:
