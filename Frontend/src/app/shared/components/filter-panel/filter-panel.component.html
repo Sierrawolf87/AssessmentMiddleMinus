@@ -27,15 +27,80 @@
             class="filter-input">
     </div>
 
-    <div class="filter-group">
-        <label>
-            <input type="checkbox" [(ngModel)]="realTimeEnabled" (change)="onRealTimeToggle()" class="realtime-toggle">
-            Real-Time Updates
-        </label>
+    <!-- Sensor Value Filters -->
+    <div class="sensor-filters" *ngIf="showSensorFilters">
+        <div class="filter-group-small">
+            <label for="co2-min">CO2 Min</label>
+            <input id="co2-min" type="number" [(ngModel)]="filters.co2Min" (change)="onFilterChange()"
+                class="filter-input-small" placeholder="Min">
+        </div>
+
+        <div class="filter-group-small">
+            <label for="co2-max">CO2 Max</label>
+            <input id="co2-max" type="number" [(ngModel)]="filters.co2Max" (change)="onFilterChange()"
+                class="filter-input-small" placeholder="Max">
+        </div>
+
+        <div class="filter-group-small">
+            <label for="pm25-min">PM2.5 Min</label>
+            <input id="pm25-min" type="number" [(ngModel)]="filters.pm25Min" (change)="onFilterChange()"
+                class="filter-input-small" placeholder="Min">
+        </div>
+
+        <div class="filter-group-small">
+            <label for="pm25-max">PM2.5 Max</label>
+            <input id="pm25-max" type="number" [(ngModel)]="filters.pm25Max" (change)="onFilterChange()"
+                class="filter-input-small" placeholder="Max">
+        </div>
+
+        <div class="filter-group-small">
+            <label for="humidity-min">Humidity Min</label>
+            <input id="humidity-min" type="number" [(ngModel)]="filters.humidityMin" (change)="onFilterChange()"
+                class="filter-input-small" placeholder="Min">
+        </div>
+
+        <div class="filter-group-small">
+            <label for="humidity-max">Humidity Max</label>
+            <input id="humidity-max" type="number" [(ngModel)]="filters.humidityMax" (change)="onFilterChange()"
+                class="filter-input-small" placeholder="Max">
+        </div>
+
+        <div class="filter-group-small">
+            <label for="motion-filter">Motion</label>
+            <select id="motion-filter" [(ngModel)]="filters.motion" (change)="onFilterChange()"
+                class="filter-select-small">
+                <option [ngValue]="undefined">All</option>
+                <option [ngValue]="true">Detected</option>
+                <option [ngValue]="false">Not Detected</option>
+            </select>
+        </div>
+
+        <div class="filter-group-small">
+            <label for="energy-min">Energy Min</label>
+            <input id="energy-min" type="number" step="0.01" [(ngModel)]="filters.energyMin" (change)="onFilterChange()"
+                class="filter-input-small" placeholder="Min">
+        </div>
+
+        <div class="filter-group-small">
+            <label for="energy-max">Energy Max</label>
+            <input id="energy-max" type="number" step="0.01" [(ngModel)]="filters.energyMax" (change)="onFilterChange()"
+                class="filter-input-small" placeholder="Max">
+        </div>
     </div>
 
-    <div class="button-group">
-        <button class="refresh-btn" (click)="onRefresh()">🔄 Refresh</button>
-        <button class="clear-btn" (click)="clearFilters()">Clear Filters</button>
+    <!-- Actions section with separator -->
+    <div class="actions-section">
+        <div class="filter-group">
+            <label>
+                <input type="checkbox" [(ngModel)]="realTimeEnabled" (change)="onRealTimeToggle()"
+                    class="realtime-toggle">
+                Real-Time Updates
+            </label>
+        </div>
+
+        <div class="button-group">
+            <button class="refresh-btn" (click)="onRefresh()">🔄 Refresh</button>
+            <button class="clear-btn" (click)="clearFilters()">Clear Filters</button>
+        </div>
     </div>
 </div>

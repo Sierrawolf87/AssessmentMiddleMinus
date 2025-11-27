@@ -25,7 +25,7 @@ export class ConfigService {
       console.error('Failed to load configuration:', error);
       // Fallback to default configuration
       this.config = {
-        baseUrl: 'http://localhost:8080',
+        baseUrl: 'http://localhost',
         signalRPath: '/notifications/notificationHub',
         graphQLPath: '/graphql'
       };

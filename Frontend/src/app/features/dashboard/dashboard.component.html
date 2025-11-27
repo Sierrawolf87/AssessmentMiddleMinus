@@ -1,11 +1,11 @@
 <div class="dashboard-container">
+    <app-filter-panel [showSensorFilters]="true" (filterChange)="onFilterChange($event)" (refresh)="onRefresh()"
+        (realTimeToggle)="onRealTimeToggle($event)">
+    </app-filter-panel>
     <app-glass-card title="All Sensor Data">
-        <app-filter-panel (filterChange)="onFilterChange($event)" (refresh)="onRefresh()"
-            (realTimeToggle)="onRealTimeToggle($event)">
-        </app-filter-panel>
-
         <app-data-table [data]="readings" [totalCount]="totalCount" [currentPage]="currentPage" [pageSize]="pageSize"
-            [pageInfo]="pageInfo" (pageChange)="onPageChange($event)" (sortChange)="onSortChange($event)">
+            [pageInfo]="pageInfo" [loading]="loading" (pageChange)="onPageChange($event)"
+            (sortChange)="onSortChange($event)">
         </app-data-table>
     </app-glass-card>
 </div>

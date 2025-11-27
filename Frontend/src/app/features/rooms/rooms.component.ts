@@ -21,6 +21,8 @@ interface RoomData {
   // Sorting
   sortField: string;
   sortDirection: 'asc' | 'desc';
+  // Loading state
+  loading: boolean;
 }
 
 @Component({
@@ -65,7 +67,8 @@ export class RoomsComponent implements OnInit, OnDestroy {
       cursorHistory: [null], // Start with null for first page
       currentCursorIndex: 0,
       sortField: 'timestamp',
-      sortDirection: 'desc' as 'asc' | 'desc'
+      sortDirection: 'desc' as 'asc' | 'desc',
+      loading: false
     }));
   }
 
@@ -78,6 +81,7 @@ export class RoomsComponent implements OnInit, OnDestroy {
     const where = this.buildWhereFilter(room.location);
     const order = [{ [room.sortField]: room.sortDirection.toUpperCase() }];
 
+    room.loading = true;
     this.sensorService.getReadings(this.pageSize, currentCursor, where, order)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
@@ -85,8 +89,12 @@ export class RoomsComponent implements OnInit, OnDestroy {
           room.readings = data?.items ?? [];
           room.totalCount = data?.totalCount ?? 0;
           room.pageInfo = data?.pageInfo;
+          room.loading = false;
         },
-        error: (err) => console.error(`Error loading data for ${room.location}:`, err)
+        error: (err) => {
+          console.error(`Error loading data for ${room.location}:`, err);
+          room.loading = false;
+        }
       });
   }
 
@@ -166,6 +174,34 @@ export class RoomsComponent implements OnInit, OnDestroy {
     }
     if (this.filters.endDate) {
       where.timestamp = { ...where.timestamp, lte: new Date(this.filters.endDate).toISOString() };
+    }
+    // Sensor value filters
+    if (this.filters.co2Min !== undefined && this.filters.co2Min !== null && this.filters.co2Min !== '') {
+      where.co2 = { ...where.co2, gte: this.filters.co2Min };
+    }
+    if (this.filters.co2Max !== undefined && this.filters.co2Max !== null && this.filters.co2Max !== '') {
+      where.co2 = { ...where.co2, lte: this.filters.co2Max };
+    }
+    if (this.filters.pm25Min !== undefined && this.filters.pm25Min !== null && this.filters.pm25Min !== '') {
+      where.pm25 = { ...where.pm25, gte: this.filters.pm25Min };
+    }
+    if (this.filters.pm25Max !== undefined && this.filters.pm25Max !== null && this.filters.pm25Max !== '') {
+      where.pm25 = { ...where.pm25, lte: this.filters.pm25Max };
+    }
+    if (this.filters.humidityMin !== undefined && this.filters.humidityMin !== null && this.filters.humidityMin !== '') {
+      where.humidity = { ...where.humidity, gte: this.filters.humidityMin };
+    }
+    if (this.filters.humidityMax !== undefined && this.filters.humidityMax !== null && this.filters.humidityMax !== '') {
+      where.humidity = { ...where.humidity, lte: this.filters.humidityMax };
+    }
+    if (this.filters.motion !== undefined && this.filters.motion !== null) {
+      where.motionDetected = { eq: this.filters.motion };
+    }
+    if (this.filters.energyMin !== undefined && this.filters.energyMin !== null && this.filters.energyMin !== '') {
+      where.energy = { ...where.energy, gte: this.filters.energyMin };
+    }
+    if (this.filters.energyMax !== undefined && this.filters.energyMax !== null && this.filters.energyMax !== '') {
+      where.energy = { ...where.energy, lte: this.filters.energyMax };
     }
     
     return where;

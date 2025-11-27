@@ -1,7 +1,10 @@
 <div class="app-container">
   <nav class="navbar">
     <div class="nav-content">
-      <h1 class="nav-title">{{ title }}</h1>
+      <div class="nav-logo">
+        <img src="{{ 'assets/images/logo.png' }}" alt="Logo" class="nav-logo-img">
+        <h1 class="nav-title">{{ title }}</h1>
+      </div>
       <div class="nav-links">
         <a routerLink="/dashboard" routerLinkActive="active" class="nav-link">
           <span class="nav-icon">📊</span>

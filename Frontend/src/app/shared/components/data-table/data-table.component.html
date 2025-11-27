@@ -1,4 +1,7 @@
 <div class="table-container">
+    <div class="loader-overlay" *ngIf="loading">
+        <div class="spinner"></div>
+    </div>
     <table class="data-table">
         <thead>
             <tr>
@@ -20,11 +23,31 @@
                         {{ sortDirection === 'asc' ? '↑' : '↓' }}
                     </span>
                 </th>
-                <th>CO2</th>
-                <th>PM2.5</th>
-                <th>Humidity</th>
+                <th (click)="onSort('co2')" class="sortable">
+                    CO2
+                    <span class="sort-indicator" *ngIf="sortField === 'co2'">
+                        {{ sortDirection === 'asc' ? '↑' : '↓' }}
+                    </span>
+                </th>
+                <th (click)="onSort('pm25')" class="sortable">
+                    PM2.5
+                    <span class="sort-indicator" *ngIf="sortField === 'pm25'">
+                        {{ sortDirection === 'asc' ? '↑' : '↓' }}
+                    </span>
+                </th>
+                <th (click)="onSort('humidity')" class="sortable">
+                    Humidity
+                    <span class="sort-indicator" *ngIf="sortField === 'humidity'">
+                        {{ sortDirection === 'asc' ? '↑' : '↓' }}
+                    </span>
+                </th>
                 <th>Motion</th>
-                <th>Energy</th>
+                <th (click)="onSort('energy')" class="sortable">
+                    Energy
+                    <span class="sort-indicator" *ngIf="sortField === 'energy'">
+                        {{ sortDirection === 'asc' ? '↑' : '↓' }}
+                    </span>
+                </th>
             </tr>
         </thead>
         <tbody>
