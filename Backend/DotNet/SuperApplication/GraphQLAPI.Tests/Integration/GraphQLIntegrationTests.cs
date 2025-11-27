@@ -24,6 +24,7 @@ public class GraphQLIntegrationTests : IDisposable
         
         // Build GraphQL executor with test schema
         _executor = new ServiceCollection()
+            .AddLogging()
             .AddSingleton(_context)
             .AddGraphQL()
             .AddQueryType<SensorReadingQueries>()
