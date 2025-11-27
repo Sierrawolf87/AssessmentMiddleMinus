@@ -1,8 +1,20 @@
 using NotificationService.Hubs;
 using NotificationService.Services;
 using NotificationService.Configuration;
+using Serilog;
+using Serilog.Sinks.Grafana.Loki;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configure Serilog
+var lokiUrl = builder.Configuration["Logging:LokiPath"] ?? "http://loki:3100";
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .WriteTo.GrafanaLoki(lokiUrl, labels: new[] { new LokiLabel { Key = "service", Value = "NotificationService" } })
+    .CreateLogger();
+
+// Use Serilog for logging
+builder.Host.UseSerilog();
 
 // Add services to the container.
 builder.Services.AddControllers();
@@ -53,3 +65,6 @@ app.MapHub<NotificationHub>("/notificationHub");
 app.MapHealthChecks("/health");
 
 app.Run();
+
+// Ensure logs are flushed on shutdown
+Log.CloseAndFlush();

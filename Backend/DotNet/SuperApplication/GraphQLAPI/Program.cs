@@ -1,8 +1,20 @@
 using GraphQLAPI.Queries;
 using Microsoft.EntityFrameworkCore;
 using SuperApplication.Shared.Data;
+using Serilog;
+using Serilog.Sinks.Grafana.Loki;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configure Serilog
+var lokiUrl = builder.Configuration["Logging:LokiPath"] ?? "http://loki:3100";
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .WriteTo.GrafanaLoki(lokiUrl, labels: new[] { new LokiLabel { Key = "service", Value = "GraphQLAPI" } })
+    .CreateLogger();
+
+// Use Serilog for logging
+builder.Host.UseSerilog();
 
 // Add database context with PostgreSQL
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -66,3 +78,6 @@ app.MapControllers();
 app.MapHealthChecks("/health");
 
 app.Run();
+
+// Ensure logs are flushed on shutdown
+Log.CloseAndFlush();
