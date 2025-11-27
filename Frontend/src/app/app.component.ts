@@ -10,5 +10,5 @@ import { CommonModule } from '@angular/common';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  title = 'Sensor Monitoring Dashboard';
+  title = 'Sensor Monitoring';
 }
