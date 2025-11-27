@@ -26,6 +26,18 @@
     gap: 16px;
 }
 
+.nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.nav-logo-img {
+    height: 40px;
+    width: auto;
+    object-fit: contain;
+}
+
 .nav-title {
     margin: 0;
     font-size: 1.5rem;

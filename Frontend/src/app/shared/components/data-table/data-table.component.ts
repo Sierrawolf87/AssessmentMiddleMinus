@@ -19,6 +19,7 @@ export class DataTableComponent {
   @Input() pageSize: number = 20;
   @Input() pageInfo?: PageInfo;
   @Input() showLocationColumn: boolean = true;
+  @Input() loading: boolean = false;
   
   @Output() pageChange = new EventEmitter<'next' | 'prev'>();
   @Output() sortChange = new EventEmitter<{field: string, direction: 'asc' | 'desc'}>();

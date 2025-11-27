@@ -10,6 +10,16 @@ export interface FilterOptions {
   startDate?: string;
   endDate?: string;
   resetSort?: boolean;
+  // Sensor value filters
+  co2Min?: number;
+  co2Max?: number;
+  pm25Min?: number;
+  pm25Max?: number;
+  humidityMin?: number;
+  humidityMax?: number;
+  motion?: boolean;
+  energyMin?: number;
+  energyMax?: number;
 }
 
 @Component({
@@ -23,6 +33,7 @@ export class FilterPanelComponent {
   @Input() showSensorType: boolean = true;
   @Input() showLocation: boolean = true;
   @Input() showEndDate: boolean = true;
+  @Input() showSensorFilters: boolean = false;
   
   @Output() filterChange = new EventEmitter<FilterOptions>();
   @Output() refresh = new EventEmitter<void>();

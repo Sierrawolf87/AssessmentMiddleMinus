@@ -15,6 +15,7 @@ export class LineChartComponent implements AfterViewInit, OnDestroy {
   @ViewChild('chartCanvas', { static: false }) chartCanvas!: ElementRef<HTMLCanvasElement>;
   @Input() chartData: any;
   @Input() chartTitle: string = 'Chart';
+  @Input() loading: boolean = false;
 
   private chart?: Chart;
 

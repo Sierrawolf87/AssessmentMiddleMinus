@@ -31,6 +31,13 @@ export class AnalyticsComponent implements OnInit, OnDestroy {
   filters: any = {};
   realTimeEnabled: boolean = false;
 
+  // Loading states for each chart
+  co2Loading: boolean = false;
+  pm25Loading: boolean = false;
+  humidityLoading: boolean = false;
+  energyLoading: boolean = false;
+  motionLoading: boolean = false;
+
   constructor(
     private sensorService: SensorService,
     private signalrService: SignalrService
@@ -58,56 +65,81 @@ export class AnalyticsComponent implements OnInit, OnDestroy {
 
   loadCO2Data() {
     const where = this.buildWhereFilter(SensorType.AirQuality);
+    this.co2Loading = true;
     this.loadAllData(where, [{ timestamp: 'ASC' }]).subscribe({
       next: (allData: SensorReading[]) => {
         this.co2ChartData = this.buildChartData(allData, ['co2']);
         this.updateChart(0);
+        this.co2Loading = false;
       },
-      error: (err: any) => console.error('Error loading CO2 data:', err)
+      error: (err: any) => {
+        console.error('Error loading CO2 data:', err);
+        this.co2Loading = false;
+      }
     });
   }
 
   loadPM25Data() {
     const where = this.buildWhereFilter(SensorType.AirQuality);
+    this.pm25Loading = true;
     this.loadAllData(where, [{ timestamp: 'ASC' }]).subscribe({
       next: (allData: SensorReading[]) => {
         this.pm25ChartData = this.buildChartData(allData, ['pm25']);
         this.updateChart(1);
+        this.pm25Loading = false;
       },
-      error: (err: any) => console.error('Error loading PM2.5 data:', err)
+      error: (err: any) => {
+        console.error('Error loading PM2.5 data:', err);
+        this.pm25Loading = false;
+      }
     });
   }
 
   loadHumidityData() {
     const where = this.buildWhereFilter(SensorType.AirQuality);
+    this.humidityLoading = true;
     this.loadAllData(where, [{ timestamp: 'ASC' }]).subscribe({
       next: (allData: SensorReading[]) => {
         this.humidityChartData = this.buildChartData(allData, ['humidity']);
         this.updateChart(2);
+        this.humidityLoading = false;
       },
-      error: (err: any) => console.error('Error loading Humidity data:', err)
+      error: (err: any) => {
+        console.error('Error loading Humidity data:', err);
+        this.humidityLoading = false;
+      }
     });
   }
 
   loadEnergyData() {
     const where = this.buildWhereFilter(SensorType.Energy);
+    this.energyLoading = true;
     this.loadAllData(where, [{ timestamp: 'ASC' }]).subscribe({
       next: (allData: SensorReading[]) => {
         this.energyChartData = this.buildChartData(allData, ['energy']);
         this.updateChart(3);
+        this.energyLoading = false;
       },
-      error: (err: any) => console.error('Error loading energy data:', err)
+      error: (err: any) => {
+        console.error('Error loading energy data:', err);
+        this.energyLoading = false;
+      }
     });
   }
 
   loadMotionData() {
     const where = this.buildWhereFilter(SensorType.Motion);
+    this.motionLoading = true;
     this.loadAllData(where, [{ timestamp: 'ASC' }]).subscribe({
       next: (allData: SensorReading[]) => {
         this.motionChartData = this.buildMotionChartData(allData);
         this.updateChart(4);
+        this.motionLoading = false;
       },
-      error: (err: any) => console.error('Error loading motion data:', err)
+      error: (err: any) => {
+        console.error('Error loading motion data:', err);
+        this.motionLoading = false;
+      }
     });
   }
 
