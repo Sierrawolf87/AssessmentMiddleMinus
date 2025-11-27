@@ -3,16 +3,20 @@ using GraphQLAPI.Queries;
 using GraphQLAPI.Tests.Helpers;
 using Microsoft.EntityFrameworkCore;
 using SuperApplication.Shared.Data.Entities.Enums;
+using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Logging;
 
 namespace GraphQLAPI.Tests.Queries;
 
 public class SensorReadingQueriesTests : IDisposable
 {
     private readonly SensorReadingQueries _queries;
+    private readonly ILogger<SensorReadingQueries> _logger;
 
     public SensorReadingQueriesTests()
     {
         _queries = new SensorReadingQueries();
+        _logger = NullLogger<SensorReadingQueries>.Instance;
     }
 
     [Fact]
@@ -22,7 +26,8 @@ public class SensorReadingQueriesTests : IDisposable
         using var context = TestHelpers.CreateInMemoryDbContext();
 
         // Act
-        var result = _queries.GetSensorReadings(context);
+        // Act
+        var result = _queries.GetSensorReadings(context, _logger);
 
         // Assert
         result.Should().NotBeNull();
@@ -37,7 +42,8 @@ public class SensorReadingQueriesTests : IDisposable
         await TestHelpers.SeedDatabase(context);
 
         // Act
-        var result = _queries.GetSensorReadings(context);
+        // Act
+        var result = _queries.GetSensorReadings(context, _logger);
         var readings = await result.ToListAsync();
 
         // Assert
@@ -54,7 +60,8 @@ public class SensorReadingQueriesTests : IDisposable
         await context.SaveChangesAsync();
 
         // Act
-        var result = await _queries.GetSensorReadingById(sample.Id, context);
+        // Act
+        var result = await _queries.GetSensorReadingById(sample.Id, context, _logger);
 
         // Assert
         result.Should().NotBeNull();
@@ -71,7 +78,8 @@ public class SensorReadingQueriesTests : IDisposable
         var nonExistingId = Guid.NewGuid();
 
         // Act
-        var result = await _queries.GetSensorReadingById(nonExistingId, context);
+        // Act
+        var result = await _queries.GetSensorReadingById(nonExistingId, context, _logger);
 
         // Assert
         result.Should().BeNull();
@@ -85,7 +93,8 @@ public class SensorReadingQueriesTests : IDisposable
         await TestHelpers.SeedDatabase(context);
 
         // Act
-        var stats = await _queries.GetSensorReadingStats(context);
+        // Act
+        var stats = await _queries.GetSensorReadingStats(context, _logger);
 
         // Assert
         stats.Should().NotBeNull();
@@ -103,7 +112,8 @@ public class SensorReadingQueriesTests : IDisposable
         await TestHelpers.SeedDatabase(context);
 
         // Act
-        var stats = await _queries.GetSensorReadingStats(context, type: SensorType.AirQuality);
+        // Act
+        var stats = await _queries.GetSensorReadingStats(context, _logger, type: SensorType.AirQuality);
 
         // Assert
         stats.Should().NotBeNull();
@@ -118,7 +128,8 @@ public class SensorReadingQueriesTests : IDisposable
         await TestHelpers.SeedDatabase(context);
 
         // Act
-        var stats = await _queries.GetSensorReadingStats(context, name: SensorLocation.LivingRoom);
+        // Act
+        var stats = await _queries.GetSensorReadingStats(context, _logger, name: SensorLocation.LivingRoom);
 
         // Assert
         stats.Should().NotBeNull();
@@ -135,7 +146,8 @@ public class SensorReadingQueriesTests : IDisposable
         var endDate = DateTime.UtcNow.AddHours(-1.5);
 
         // Act
-        var stats = await _queries.GetSensorReadingStats(context, startDate: startDate, endDate: endDate);
+        // Act
+        var stats = await _queries.GetSensorReadingStats(context, _logger, startDate: startDate, endDate: endDate);
 
         // Assert
         stats.Should().NotBeNull();
@@ -151,7 +163,8 @@ public class SensorReadingQueriesTests : IDisposable
         await TestHelpers.SeedDatabase(context);
 
         // Act
-        var stats = await _queries.GetSensorReadingStats(context);
+        // Act
+        var stats = await _queries.GetSensorReadingStats(context, _logger);
 
         // Assert
         stats.AverageCo2.Should().NotBeNull();
@@ -172,7 +185,8 @@ public class SensorReadingQueriesTests : IDisposable
         await TestHelpers.SeedDatabase(context);
 
         // Act
-        var stats = await _queries.GetSensorReadingStats(context);
+        // Act
+        var stats = await _queries.GetSensorReadingStats(context, _logger);
 
         // Assert
         stats.MaxCo2.Should().Be(500);
@@ -189,7 +203,8 @@ public class SensorReadingQueriesTests : IDisposable
         await TestHelpers.SeedDatabase(context);
 
         // Act
-        var stats = await _queries.GetSensorReadingStats(context);
+        // Act
+        var stats = await _queries.GetSensorReadingStats(context, _logger);
 
         // Assert
         stats.MotionDetectedCount.Should().Be(1); // Only 1 motion sensor with true

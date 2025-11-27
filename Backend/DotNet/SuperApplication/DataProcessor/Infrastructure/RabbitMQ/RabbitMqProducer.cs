@@ -42,6 +42,7 @@ public class RabbitMqProducer(IOptions<RabbitMqOptions> options, ILogger<RabbitM
 
             _connection = await factory.CreateConnectionAsync(cancellationToken);
             _channel = await _connection.CreateChannelAsync(cancellationToken: cancellationToken);
+            logger.LogInformation("Successfully connected to RabbitMQ at {HostName}:{Port}", _options.HostName, _options.Port);
         }
         catch (Exception ex)
         {
@@ -71,6 +72,7 @@ public class RabbitMqProducer(IOptions<RabbitMqOptions> options, ILogger<RabbitM
         };
 
         await _channel.BasicPublishAsync(exchange: string.Empty, routingKey: queueName, mandatory: false, basicProperties: properties, body: body, cancellationToken: cancellationToken);
+        logger.LogDebug("Published message to queue {QueueName}. Size: {Size} bytes", queueName, body.Length);
     }
 
     public void Dispose()

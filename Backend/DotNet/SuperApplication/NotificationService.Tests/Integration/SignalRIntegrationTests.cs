@@ -1,6 +1,7 @@
 using FluentAssertions;
 using Microsoft.AspNetCore.SignalR;
 using Moq;
+using Microsoft.Extensions.Logging.Abstractions;
 using NotificationService.Hubs;
 using NotificationService.Tests.Helpers;
 using SuperApplication.Shared.Data.Entities;
@@ -34,7 +35,7 @@ public class SignalRIntegrationTests
             })
             .Returns(Task.CompletedTask);
 
-        var hub = new NotificationHub
+        var hub = new NotificationHub(NullLogger<NotificationHub>.Instance)
         {
             Clients = mockClients.Object
         };
@@ -70,7 +71,7 @@ public class SignalRIntegrationTests
             .Callback(() => broadcastCount++)
             .Returns(Task.CompletedTask);
 
-        var hub = new NotificationHub
+        var hub = new NotificationHub(NullLogger<NotificationHub>.Instance)
         {
             Clients = mockClients.Object
         };
@@ -96,7 +97,7 @@ public class SignalRIntegrationTests
 
         mockClients.Setup(clients => clients.All).Returns(mockAllClientsProxy.Object);
 
-        var hub = new NotificationHub
+        var hub = new NotificationHub(NullLogger<NotificationHub>.Instance)
         {
             Clients = mockClients.Object
         };
@@ -137,7 +138,7 @@ public class SignalRIntegrationTests
             })
             .Returns(Task.CompletedTask);
 
-        var hub = new NotificationHub
+        var hub = new NotificationHub(NullLogger<NotificationHub>.Instance)
         {
             Clients = mockClients.Object
         };

@@ -1,6 +1,7 @@
 using FluentAssertions;
 using Microsoft.AspNetCore.SignalR;
 using Moq;
+using Microsoft.Extensions.Logging.Abstractions;
 using NotificationService.Hubs;
 using NotificationService.Tests.Helpers;
 using SuperApplication.Shared.Data.Entities;
@@ -18,7 +19,7 @@ public class NotificationHubTests
         
         mockClients.Setup(clients => clients.All).Returns(mockClientProxy.Object);
         
-        var hub = new NotificationHub
+        var hub = new NotificationHub(NullLogger<NotificationHub>.Instance)
         {
             Clients = mockClients.Object
         };
@@ -46,7 +47,7 @@ public class NotificationHubTests
         
         mockClients.Setup(clients => clients.All).Returns(mockClientProxy.Object);
         
-        var hub = new NotificationHub
+        var hub = new NotificationHub(NullLogger<NotificationHub>.Instance)
         {
             Clients = mockClients.Object
         };
@@ -72,7 +73,7 @@ public class NotificationHubTests
         
         mockClients.Setup(clients => clients.All).Returns(mockClientProxy.Object);
         
-        var hub = new NotificationHub
+        var hub = new NotificationHub(NullLogger<NotificationHub>.Instance)
         {
             Clients = mockClients.Object
         };

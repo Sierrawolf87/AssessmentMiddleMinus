@@ -38,6 +38,7 @@ public class ProcessMessageCommandHandler(
 
             if (sensorMessages != null)
             {
+                logger.LogInformation("Processing {Count} sensor readings from message", sensorMessages.Count);
                 foreach (var msg in sensorMessages)
                 {
                     var reading = new SensorReading
@@ -64,6 +65,12 @@ public class ProcessMessageCommandHandler(
         }
 
         await dbContext.SaveChangesAsync(cancellationToken);
-        await producer.SendMessageAsync(notificationMessages, _options.NotificationQueueName, cancellationToken);
+        await dbContext.SaveChangesAsync(cancellationToken);
+        
+        if (notificationMessages.Count > 0)
+        {
+            await producer.SendMessageAsync(notificationMessages, _options.NotificationQueueName, cancellationToken);
+            logger.LogInformation("Saved {Count} readings to database and forwarded to notification queue", notificationMessages.Count);
+        }
     }
 }
