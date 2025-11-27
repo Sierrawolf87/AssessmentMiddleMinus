@@ -82,6 +82,12 @@ jobs:
           - name: nginx
             context: ./nginx
             dockerfile: ./nginx/Dockerfile
+          - name: grafana
+            context: ./grafana
+            dockerfile: ./grafana/Dockerfile
+          - name: loki
+            context: ./loki
+            dockerfile: ./loki/Dockerfile
     
     steps:
       - name: Checkout code

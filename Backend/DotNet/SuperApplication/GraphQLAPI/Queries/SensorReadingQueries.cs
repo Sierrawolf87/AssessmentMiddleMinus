@@ -21,8 +21,11 @@ public class SensorReadingQueries
     [UseProjection]
     [UseFiltering]
     [UseSorting]
-    public IQueryable<SensorReading> GetSensorReadings([Service] ApplicationDbContext context)
+    public IQueryable<SensorReading> GetSensorReadings(
+        [Service] ApplicationDbContext context,
+        [Service] ILogger<SensorReadingQueries> logger)
     {
+        logger.LogDebug("Fetching sensor readings queryable");
         return context.SensorReadings.AsNoTracking();
     }
     
@@ -35,8 +38,10 @@ public class SensorReadingQueries
     [UseProjection]
     public async Task<SensorReading?> GetSensorReadingById(
         Guid id, 
-        [Service] ApplicationDbContext context)
+        [Service] ApplicationDbContext context,
+        [Service] ILogger<SensorReadingQueries> logger)
     {
+        logger.LogDebug("Fetching sensor reading by ID: {Id}", id);
         return await context.SensorReadings
             .AsNoTracking()
             .FirstOrDefaultAsync(sr => sr.Id == id);
@@ -53,11 +58,15 @@ public class SensorReadingQueries
     /// <returns>Aggregated statistics</returns>
     public async Task<SensorReadingStats> GetSensorReadingStats(
         [Service] ApplicationDbContext context,
+        [Service] ILogger<SensorReadingQueries> logger,
         SensorType? type = null,
         SensorLocation? name = null,
         DateTime? startDate = null,
         DateTime? endDate = null)
     {
+        logger.LogInformation("Calculating sensor reading stats. Filters - Type: {Type}, Name: {Name}, Start: {Start}, End: {End}", 
+            type, name, startDate, endDate);
+
         var query = context.SensorReadings.AsNoTracking().AsQueryable();
         
         // Apply filters

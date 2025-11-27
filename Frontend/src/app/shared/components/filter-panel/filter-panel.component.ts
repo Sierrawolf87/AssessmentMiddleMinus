@@ -1,8 +1,9 @@
-import { Component, Output, EventEmitter, Input } from '@angular/core';
+import { Component, Output, EventEmitter, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SensorType, SensorLocation } from '../../../core/models/enums';
-import { getSensorTypeOptions, getSensorLocationOptions } from '../../../core/utils/enum.utils';
+import { getSensorLocationOptions } from '../../../core/utils/enum.utils';
+import { GraphqlService } from '../../../core/services/graphql.service';
 
 export interface FilterOptions {
   type?: SensorType;
@@ -29,7 +30,7 @@ export interface FilterOptions {
   templateUrl: './filter-panel.component.html',
   styleUrls: ['./filter-panel.component.css']
 })
-export class FilterPanelComponent {
+export class FilterPanelComponent implements OnInit {
   @Input() showSensorType: boolean = true;
   @Input() showLocation: boolean = true;
   @Input() showEndDate: boolean = true;
@@ -42,8 +43,37 @@ export class FilterPanelComponent {
   filters: FilterOptions = {};
   realTimeEnabled: boolean = false;
 
-  sensorTypeOptions = getSensorTypeOptions();
+  sensorTypeOptions: { label: string; value: SensorType }[] = [];
   sensorLocationOptions = getSensorLocationOptions();
+
+  constructor(private graphqlService: GraphqlService) {}
+
+  ngOnInit() {
+    // Fetch sensor types from REST API
+    this.graphqlService.getSensorTypes().subscribe({
+      next: (types) => {
+        this.sensorTypeOptions = types.map(type => ({
+          label: this.formatSensorTypeLabel(type),
+          value: type as SensorType
+        }));
+      },
+      error: (error) => {
+        console.error('Failed to fetch sensor types:', error);
+        // Fallback to empty array or default values
+        this.sensorTypeOptions = [];
+      }
+    });
+  }
+
+  /**
+   * Format sensor type from API format (AIR_QUALITY) to display format (Air Quality)
+   */
+  private formatSensorTypeLabel(type: string): string {
+    return type
+      .split('_')
+      .map(word => word.charAt(0) + word.slice(1).toLowerCase())
+      .join(' ');
+  }
 
   onFilterChange() {
     this.filterChange.emit(this.filters);

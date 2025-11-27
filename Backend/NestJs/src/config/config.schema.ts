@@ -19,4 +19,6 @@ export const envValidationSchema = Joi.object<EnvVars>({
   METERS_POLL_INTERVAL_MS: Joi.number().positive().default(5000),
   METERS_TIMEOUT_MS: Joi.number().positive().default(3000),
   RETRY_MAX_DELAY_MS: Joi.number().positive().default(30000),
+
+  LOKI_URL: Joi.string().uri().default('http://loki:3100'),
 });

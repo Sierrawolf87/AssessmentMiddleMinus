@@ -98,6 +98,7 @@ export class MetersService implements OnModuleInit {
     }
 
       if (data.length > 0) {
+        this.log.log(`Fetched ${data.length} readings from API`);
         await this.publishReadings(data);
       }
 
@@ -109,6 +110,7 @@ export class MetersService implements OnModuleInit {
 
   private async publishReadings(readings: Reading[]) {
     await this.rabbit.publish(readings);
+    this.log.log(`Published ${readings.length} readings to RabbitMQ`);
   }
 
   private computeRetryDelay(err: unknown, attempt: number): number {

@@ -66,6 +66,7 @@ public class RabbitMqListener : BackgroundService
                     if (sensorReading != null)
                     {
                         await _hubContext.Clients.All.SendAsync("ReceiveSensorReading", sensorReading, ct);
+                        _logger.LogInformation("Broadcasted {Count} sensor readings to SignalR clients", sensorReading.Count);
                     }
                 }
                 catch (Exception ex)

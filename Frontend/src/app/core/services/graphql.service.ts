@@ -1,9 +1,11 @@
 import { Injectable } from '@angular/core';
 import { Apollo, gql } from 'apollo-angular';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { SensorReading, SensorReadingStats } from '../models/sensor-reading.model';
 import { SensorLocation, SensorType } from '../models/enums';
+import { ConfigService } from './config.service';
 
 export interface PageInfo {
   hasNextPage: boolean;
@@ -65,7 +67,11 @@ const GET_SENSOR_STATS = gql`
 })
 export class GraphqlService {
 
-  constructor(private apollo: Apollo) { }
+  constructor(
+    private apollo: Apollo,
+    private http: HttpClient,
+    private configService: ConfigService
+  ) { }
 
   /**
    * Get sensor readings using cursor-based pagination
@@ -111,5 +117,14 @@ export class GraphqlService {
     }).pipe(
       map(result => result.data.sensorReadingStats)
     );
+  }
+
+  /**
+   * Get all sensor types from REST API
+   * @returns Observable array of sensor type strings in uppercase with underscores
+   */
+  getSensorTypes(): Observable<string[]> {
+    const url = `${this.configService.restUrl}/api/sensortypes`;
+    return this.http.get<string[]>(url);
   }
 }

@@ -24,7 +24,12 @@ export class RabbitService implements OnModuleInit, OnModuleDestroy {
     });
 
     const url = this.buildAmqpUrl();
-    this.conn = await amqplib.connect(url + "?frameMax=131072");
+    try {
+      this.conn = await amqplib.connect(url + "?frameMax=131072");
+    } catch (e) {
+      this.log.error(`Failed to connect to RabbitMQ: ${e}`);
+      throw e;
+    }
 
     this.ch = await this.conn.createConfirmChannel();
     await this.ch.assertQueue(this.queue, {
@@ -37,8 +42,9 @@ export class RabbitService implements OnModuleInit, OnModuleDestroy {
   }
 
   async onModuleDestroy() {
-    await this.ch?.close().catch(() => {});
-    await this.conn?.close().catch(() => {});
+    this.log.log('Closing RabbitMQ connection');
+    await this.ch?.close().catch((e) => this.log.error(`Error closing channel: ${e}`));
+    await this.conn?.close().catch((e) => this.log.error(`Error closing connection: ${e}`));
   }
 
   async publish(reading: unknown) {

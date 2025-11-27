@@ -49,6 +49,7 @@ public class RabbitMqConsumerService(
                 var message = Encoding.UTF8.GetString(body);
                 var routingKey = ea.RoutingKey;
 
+                logger.LogDebug("Received message from RabbitMQ. RoutingKey: {RoutingKey}, Size: {Size} bytes", routingKey, body.Length);
                 await ProcessMessageAsync(message, routingKey);
             };
 

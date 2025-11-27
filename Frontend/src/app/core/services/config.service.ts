@@ -27,7 +27,8 @@ export class ConfigService {
       this.config = {
         baseUrl: 'http://localhost',
         signalRPath: '/notifications/notificationHub',
-        graphQLPath: '/graphql'
+        graphQLPath: '/graphql',
+        restPath: '/rest'
       };
       return this.config;
     }
@@ -50,5 +51,9 @@ export class ConfigService {
 
   get graphQLUrl(): string {
     return this.getConfig().baseUrl + this.getConfig().graphQLPath;
+  }
+
+  get restUrl(): string {
+    return this.getConfig().baseUrl + this.getConfig().restPath;
   }
 }

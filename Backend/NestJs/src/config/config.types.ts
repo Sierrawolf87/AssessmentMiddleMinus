@@ -14,4 +14,6 @@ export interface EnvVars {
   METERS_POLL_INTERVAL_MS: number;
   METERS_TIMEOUT_MS: number;
   RETRY_MAX_DELAY_MS: number;
+
+  LOKI_URL: string;
 }
