@@ -23,6 +23,9 @@ builder.Services.AddCors(options =>
     });
 });
 
+// Add REST API controllers
+builder.Services.AddControllers();
+
 // Add GraphQL server with Hot Chocolate
 builder.Services
     .AddGraphQLServer()
@@ -51,5 +54,8 @@ app.UseCors();
 
 // Map GraphQL endpoint
 app.MapGraphQL();
+
+// Map REST API controllers
+app.MapControllers();
 
 app.Run();

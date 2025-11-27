@@ -94,6 +94,7 @@ services:
       BASE_URL: ${FRONTEND_BASE_URL}
       SIGNALR_PATH: ${FRONTEND_SIGNALR_PATH}
       GRAPHQL_PATH: ${FRONTEND_GRAPHQL_PATH}
+      REST_PATH: ${FRONTEND_REST_PATH}
     depends_on:
       - notificationService
       - graphqlapi
