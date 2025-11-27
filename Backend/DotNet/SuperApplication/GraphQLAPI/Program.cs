@@ -26,6 +26,10 @@ builder.Services.AddCors(options =>
 // Add REST API controllers
 builder.Services.AddControllers();
 
+// Add Health Checks
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<ApplicationDbContext>();
+
 // Add GraphQL server with Hot Chocolate
 builder.Services
     .AddGraphQLServer()
@@ -57,5 +61,8 @@ app.MapGraphQL();
 
 // Map REST API controllers
 app.MapControllers();
+
+// Map Health Check endpoint
+app.MapHealthChecks("/health");
 
 app.Run();

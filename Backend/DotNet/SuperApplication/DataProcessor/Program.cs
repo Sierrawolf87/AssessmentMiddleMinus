@@ -23,6 +23,10 @@ builder.Services.AddHostedService<RabbitMqConsumerService>();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
+// Add Health Checks
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<ApplicationDbContext>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -47,5 +51,7 @@ using (var scope = app.Services.CreateScope())
         throw;
     }
 }
+
+app.MapHealthChecks("/health");
 
 app.Run();

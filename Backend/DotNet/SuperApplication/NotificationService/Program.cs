@@ -26,6 +26,9 @@ builder.Services.AddSignalR();
 builder.Services.Configure<RabbitMqOptions>(builder.Configuration.GetSection("RabbitMQ"));
 builder.Services.AddHostedService<RabbitMqListener>();
 
+// Add Health Checks
+builder.Services.AddHealthChecks();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -45,5 +48,8 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.MapHub<NotificationHub>("/notificationHub");
+
+// Map Health Check endpoint
+app.MapHealthChecks("/health");
 
 app.Run();

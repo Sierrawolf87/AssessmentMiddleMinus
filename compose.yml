@@ -17,6 +17,11 @@ services:
       RabbitMQ__DataQueueName: ${RABBITMQ_DATA_QUEUE}
       RabbitMQ__NotificationQueueName: ${RABBITMQ_NOTIFICATION_QUEUE}
       MediatR__LicenseKey: ${MEDIATR_LICENSE_KEY}
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:8080/health || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     depends_on:
       postgres:
         condition: service_healthy
@@ -39,6 +44,11 @@ services:
       RabbitMQ__Password: ${RABBITMQ_DEFAULT_PASS}
       RabbitMQ__VirtualHost: ${RABBITMQ_DEFAULT_VHOST}
       RabbitMQ__NotificationQueueName: ${RABBITMQ_NOTIFICATION_QUEUE}
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:8080/health || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -54,6 +64,11 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT}
       ConnectionStrings__DefaultConnection: "Host=${POSTGRES_CONTAINER_NAME};Port=${POSTGRES_PORT};Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}"
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:8080/health || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     depends_on:
       postgres:
         condition: service_healthy
@@ -76,6 +91,11 @@ services:
       RABBITMQ_PASS: ${RABBITMQ_DEFAULT_PASS}
       RABBITMQ_VHOST: ${RABBITMQ_DEFAULT_VHOST}
       RABBITMQ_DATA_QUEUE: ${RABBITMQ_DATA_QUEUE}
+    healthcheck:
+      test: [ "CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3000/health || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     depends_on:
       postgres:
         condition: service_healthy
@@ -96,8 +116,10 @@ services:
       GRAPHQL_PATH: ${FRONTEND_GRAPHQL_PATH}
       REST_PATH: ${FRONTEND_REST_PATH}
     depends_on:
-      - notificationService
-      - graphqlapi
+      notificationService:
+        condition: service_healthy
+      graphqlapi:
+        condition: service_healthy
     networks: [ appnet ]
 
   nginx:
@@ -116,10 +138,18 @@ services:
     environment:
       NGINX_ENVIRONMENT: ${NGINX_ENVIRONMENT:-development}
       DOMAIN: ${DOMAIN:-localhost}
+    healthcheck:
+      test: [ "CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:80 || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     depends_on:
-      - frontend
-      - notificationService
-      - graphqlapi
+      frontend:
+        condition: service_started
+      notificationService:
+        condition: service_healthy
+      graphqlapi:
+        condition: service_healthy
     networks: [ appnet ]
 
   weakapp:

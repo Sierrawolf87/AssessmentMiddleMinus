@@ -20,4 +20,7 @@ RUN dotnet publish "./NotificationService.csproj" -c $BUILD_CONFIGURATION -o /ap
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+USER root
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+USER $APP_UID
 ENTRYPOINT ["dotnet", "NotificationService.dll"]
