@@ -21,14 +21,6 @@
             class="filter-input">
     </div>
 
-    <div class="filter-group" *ngIf="showTimeRange">
-        <label for="time-range">Time Range</label>
-        <select id="time-range" [(ngModel)]="filters.timeRange" (change)="onFilterChange()" class="filter-select">
-            <option [ngValue]="undefined">Custom</option>
-            <option *ngFor="let option of timeRangeOptions" [value]="option.value">{{ option.label }}</option>
-        </select>
-    </div>
-
     <div class="filter-group" *ngIf="showEndDate">
         <label for="end-date">End Date</label>
         <input id="end-date" type="datetime-local" [(ngModel)]="filters.endDate" (change)="onFilterChange()"

@@ -1,7 +1,7 @@
 <div class="analytics-container">
     <div class="filter-section">
-        <app-filter-panel [showSensorType]="false" [showEndDate]="false" [showTimeRange]="true"
-            (filterChange)="onFilterChange($event)" (refresh)="onRefresh()" (realTimeToggle)="onRealTimeToggle($event)">
+        <app-filter-panel [showSensorType]="false" [showEndDate]="false" (filterChange)="onFilterChange($event)"
+            (refresh)="onRefresh()" (realTimeToggle)="onRealTimeToggle($event)">
         </app-filter-panel>
     </div>
 
@@ -42,6 +42,17 @@
                     <div class="spinner"></div>
                 </div>
                 <app-line-chart *ngIf="energyChartData" [chartData]="energyChartData" chartTitle="Energy Usage by Room">
+                </app-line-chart>
+            </div>
+        </app-glass-card>
+
+        <app-glass-card title="Motion Detection">
+            <div class="chart-wrapper">
+                <div class="loader-overlay" *ngIf="motionLoading">
+                    <div class="spinner"></div>
+                </div>
+                <app-line-chart *ngIf="motionChartData" [chartData]="motionChartData"
+                    chartTitle="Motion Events by Room">
                 </app-line-chart>
             </div>
         </app-glass-card>

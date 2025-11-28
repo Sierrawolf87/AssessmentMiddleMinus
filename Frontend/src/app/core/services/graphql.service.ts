@@ -3,7 +3,7 @@ import { Apollo, gql } from 'apollo-angular';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { SensorReading, SensorReadingStats, AggregatedSensorReading } from '../models/sensor-reading.model';
+import { SensorReading, SensorReadingStats } from '../models/sensor-reading.model';
 import { SensorLocation, SensorType } from '../models/enums';
 import { ConfigService } from './config.service';
 
@@ -58,19 +58,6 @@ const GET_SENSOR_STATS = gql`
       maxPm25
       minPm25
       motionDetectedCount
-    }
-  }
-`;
-
-const GET_AGGREGATED_SENSOR_READINGS = gql`
-  query GetAggregatedSensorReadings($type: SensorType, $name: SensorLocation, $startDate: DateTime, $endDate: DateTime, $intervalMinutes: Int) {
-    aggregatedSensorReadings(type: $type, name: $name, startDate: $startDate, endDate: $endDate, intervalMinutes: $intervalMinutes) {
-      timestamp
-      averageCo2
-      averagePm25
-      averageHumidity
-      averageEnergy
-      count
     }
   }
 `;
@@ -139,30 +126,5 @@ export class GraphqlService {
   getSensorTypes(): Observable<string[]> {
     const url = `${this.configService.restUrl}/api/sensortypes`;
     return this.http.get<string[]>(url);
-  }
-
-  /**
-   * Get sensor readings aggregated by configurable intervals for efficient chart rendering
-   * @param type - Optional filter by sensor type
-   * @param name - Optional filter by sensor location
-   * @param startDate - Optional filter for readings after this date
-   * @param endDate - Optional filter for readings before this date
-   * @param intervalMinutes - Aggregation interval in minutes (default: 1)
-   * @returns Observable array of aggregated sensor readings grouped by the specified interval
-   */
-  getAggregatedSensorReadings(
-    type?: SensorType, 
-    name?: SensorLocation, 
-    startDate?: Date, 
-    endDate?: Date,
-    intervalMinutes: number = 1
-  ): Observable<AggregatedSensorReading[]> {
-    return this.apollo.query<any>({
-      query: GET_AGGREGATED_SENSOR_READINGS,
-      variables: { type, name, startDate, endDate, intervalMinutes },
-      fetchPolicy: 'network-only'
-    }).pipe(
-      map(result => result.data?.aggregatedSensorReadings ?? [])
-    );
   }
 }
