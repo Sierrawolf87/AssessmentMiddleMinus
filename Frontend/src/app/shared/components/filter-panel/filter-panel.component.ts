@@ -4,14 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { SensorType, SensorLocation } from '../../../core/models/enums';
 import { getSensorLocationOptions } from '../../../core/utils/enum.utils';
 import { GraphqlService } from '../../../core/services/graphql.service';
-import { TimeRange, getTimeRangeConfigs, TimeRangeConfig } from '../../../core/utils/time-range.utils';
 
 export interface FilterOptions {
   type?: SensorType;
   location?: SensorLocation;
   startDate?: string;
   endDate?: string;
-  timeRange?: TimeRange;
   resetSort?: boolean;
   // Sensor value filters
   co2Min?: number;
@@ -37,7 +35,6 @@ export class FilterPanelComponent implements OnInit {
   @Input() showLocation: boolean = true;
   @Input() showEndDate: boolean = true;
   @Input() showSensorFilters: boolean = false;
-  @Input() showTimeRange: boolean = false;
   
   @Output() filterChange = new EventEmitter<FilterOptions>();
   @Output() refresh = new EventEmitter<void>();
@@ -48,7 +45,6 @@ export class FilterPanelComponent implements OnInit {
 
   sensorTypeOptions: { label: string; value: SensorType }[] = [];
   sensorLocationOptions = getSensorLocationOptions();
-  timeRangeOptions: TimeRangeConfig[] = getTimeRangeConfigs();
 
   constructor(private graphqlService: GraphqlService) {}
 

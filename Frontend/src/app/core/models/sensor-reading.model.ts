@@ -25,15 +25,6 @@ export interface SensorReadingStats {
   motionDetectedCount: number;
 }
 
-export interface AggregatedSensorReading {
-  timestamp: string;
-  averageCo2?: number;
-  averagePm25?: number;
-  averageHumidity?: number;
-  averageEnergy?: number;
-  count: number;
-}
-
 export interface SensorMessageDto {
   type: SensorType;
   name: SensorLocation;
